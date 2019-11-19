@@ -25,11 +25,12 @@
                 android:text="Name"
                 android:layout_toRightOf="@id/nameImageView"
                 style="@style/profileDetailsTextMain" />
+
             <TextView
                 android:id="@+id/textViewUserName"
-                android:text="developer"
+                style="@style/profileDetailsMiniText"
                 android:layout_toRightOf="@id/nameImageView"
-                style="@style/profileDetailsMiniText" />
+                android:text="userName" />
         </RelativeLayout>
         <View style="@style/proifleDetailsView" />
         <RelativeLayout style="@style/profileDetailsLayout">
@@ -41,11 +42,12 @@
                 android:text="Mobile"
                 android:layout_toRightOf="@id/mobileImageView"
                 style="@style/profileDetailsTextMain"/>
+
             <TextView
                 android:id="@+id/textViewUserPhoneNumber"
-                android:text="+91-8129999999"
+                style="@style/profileDetailsMiniText"
                 android:layout_toRightOf="@id/mobileImageView"
-                style="@style/profileDetailsMiniText" />
+                android:text="등록되지 않았습니다." />
         </RelativeLayout>
         <View style="@style/proifleDetailsView" />
         <RelativeLayout style="@style/profileDetailsLayout">
@@ -57,11 +59,12 @@
                 android:text="Email"
                 android:layout_toRightOf="@id/emailImageView"
                 style="@style/profileDetailsTextMain" />
+
             <TextView
                 android:id="@+id/textViewUserEmail"
-                android:text="developer@appsnipp.com"
+                style="@style/profileDetailsMiniText"
                 android:layout_toRightOf="@id/emailImageView"
-                style="@style/profileDetailsMiniText" />
+                android:text="userEmail" />
         </RelativeLayout>
         <View style="@style/proifleDetailsView" />
 

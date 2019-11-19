@@ -19,9 +19,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.jjickjjicks.wizclock.R;
-import com.jjickjjicks.wizclock.TimerAddActivity;
 import com.jjickjjicks.wizclock.data.adapter.TimerItemAdapter;
 import com.jjickjjicks.wizclock.data.item.TimerItem;
+import com.jjickjjicks.wizclock.ui.activity.TimerAddActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;

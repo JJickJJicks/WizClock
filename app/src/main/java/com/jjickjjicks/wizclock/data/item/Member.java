@@ -14,6 +14,13 @@ public class Member {
     public Member() {
     }
 
+    public Member(String email, String name) {
+        this.email = email;
+        this.name = name;
+        this.phoneNumber = "";
+        this.experience = 0;
+    }
+
     public Member(String email, String name, String phoneNumber) {
         this.email = email;
         this.name = name;

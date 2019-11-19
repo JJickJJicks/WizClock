@@ -13,7 +13,7 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".TimerAddActivity"
+            android:name=".ui.activity.TimerAddActivity"
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name=".ui.activity.LoginActivity"

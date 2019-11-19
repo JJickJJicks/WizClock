@@ -24,7 +24,14 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.jjickjjicks.wizclock.R;
+import com.jjickjjicks.wizclock.data.item.Member;
 
 import br.com.simplepass.loading_button_lib.customViews.CircularProgressButton;
 
@@ -110,7 +117,32 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
+                            final FirebaseUser user = mAuth.getCurrentUser();
+                            final String userKey = user.getEmail().replace(".", "_");
+                            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("user");
+                            Query userSearch = databaseReference.orderByKey().equalTo(userKey);
+                            ValueEventListener searchListener = new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    if (!dataSnapshot.exists()) {
+                                        Member member;
+                                        if (!(user.getPhoneNumber() == null))
+                                            member = new Member(user.getEmail(), user.getDisplayName(), user.getPhoneNumber());
+                                        else
+                                            member = new Member(user.getEmail(), user.getDisplayName());
+
+                                        DatabaseReference memberDatabaseReference = FirebaseDatabase.getInstance().getReference("users").child(userKey);
+                                        memberDatabaseReference.setValue(member.toMap());
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            };
+                            userSearch.addListenerForSingleValueEvent(searchListener);
+
                             updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.

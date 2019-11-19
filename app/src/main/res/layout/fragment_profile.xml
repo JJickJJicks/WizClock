@@ -39,13 +39,13 @@
                     android:layout_width="142dp"
                     android:layout_height="142dp"
                     android:layout_marginTop="20dp"
-                    android:src="@drawable/profile_round" />
+                    android:src="@drawable/blank_profile_image" />
 
                 <TextView
                     android:id="@+id/textViewHeaderUserName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="\@appsnippuser"
+                    android:text="userName"
                     android:textSize="28dp"
                     android:textStyle="bold" />
 
@@ -53,7 +53,7 @@
                     android:id="@+id/textViewHeaderUserEmail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="developer@appsnipp.com"
+                    android:text="userEmail"
                     android:textSize="12dp"
                     android:textStyle="bold" />
 
@@ -64,6 +64,7 @@
                     android:padding="10dp">
 
                     <TextView
+                        android:id="@+id/textViewHeaderUserLevel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Lv.1"
@@ -72,19 +73,21 @@
                         android:textStyle="bold" />
 
                     <ProgressBar
+                        android:id="@+id/progressBarHeaderUserExp"
                         style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
                         android:layout_width="150dp"
                         android:layout_height="5dp"
                         android:layout_gravity="center"
                         android:layout_marginLeft="15dp"
-                        android:progress="60"
+                        android:progress="0"
                         android:progressDrawable="@drawable/progress_drawable" />
 
                     <TextView
+                        android:id="@+id/textViewHeaderUserExp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="15dp"
-                        android:text="6/10"
+                        android:text="0/10"
                         android:textColor="@color/whiteBodyColor"
                         android:textSize="13sp"
                         android:textStyle="bold" />

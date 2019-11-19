@@ -5,22 +5,30 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.jjickjjicks.wizclock.R;
+import com.jjickjjicks.wizclock.data.item.Member;
 
 
 public class ProfileFragment extends Fragment {
     private ImageView imageViewHeaderProfile;
-    private TextView textViewUserName, textViewUserPhoneNumber, textViewUserEmail, textViewHeaderUserName, textViewHeaderUserEmail;
-    private FirebaseUser user;
+    private TextView textViewUserName, textViewUserPhoneNumber, textViewUserEmail, textViewHeaderUserName, textViewHeaderUserEmail, textViewHeaderUserExp, textViewHeaderUserLevel;
+    private ProgressBar progressBarHeaderUserExp;
+    private FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -32,18 +40,43 @@ public class ProfileFragment extends Fragment {
         textViewHeaderUserName = root.findViewById(R.id.textViewHeaderUserName);
         textViewHeaderUserEmail = root.findViewById(R.id.textViewHeaderUserEmail);
         imageViewHeaderProfile = root.findViewById(R.id.imageViewHeaderProfile);
+        textViewHeaderUserExp = root.findViewById(R.id.textViewHeaderUserExp);
+        textViewHeaderUserLevel = root.findViewById(R.id.textViewHeaderUserLevel);
+        progressBarHeaderUserExp = root.findViewById(R.id.progressBarHeaderUserExp);
 
-        // Firebase 로드
-        user = FirebaseAuth.getInstance().getCurrentUser();
-        textViewUserName.setText(user.getDisplayName());
-        textViewUserPhoneNumber.setText((!(user.getPhoneNumber() == null) && !user.getPhoneNumber().equals("")) ? user.getPhoneNumber() : "등록되지 않았습니다.");
-        textViewUserEmail.setText(user.getEmail());
-        textViewHeaderUserName.setText(user.getDisplayName());
-        textViewHeaderUserEmail.setText(user.getEmail());
-        if (user.getPhotoUrl().equals(null))
-            Glide.with(this).load(R.drawable.blank_profile_image).apply(RequestOptions.circleCropTransform()).into(imageViewHeaderProfile);
-        else
-            Glide.with(this).load(user.getPhotoUrl()).apply(RequestOptions.circleCropTransform()).into(imageViewHeaderProfile);
+        final String userKey = user.getEmail().replace(".", "_");
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("users");
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    if (snapshot.getKey().equals(userKey)) {
+                        Member member = snapshot.getValue(Member.class);
+
+                        textViewHeaderUserName.setText(user.getDisplayName());
+                        textViewHeaderUserEmail.setText(user.getEmail());
+
+                        textViewHeaderUserLevel.setText("Lv." + member.getLevel());
+                        textViewHeaderUserExp.setText(member.getExperience() + "/10");
+                        progressBarHeaderUserExp.setProgress(member.getExperience() * 10);
+
+                        if (user.getPhotoUrl().equals(null))
+                            Glide.with(getContext()).load(R.drawable.blank_profile_image).apply(RequestOptions.circleCropTransform()).into(imageViewHeaderProfile);
+                        else
+                            Glide.with(getContext()).load(user.getPhotoUrl()).apply(RequestOptions.circleCropTransform()).into(imageViewHeaderProfile);
+
+                        textViewUserName.setText(member.getName());
+                        textViewUserPhoneNumber.setText(!(member.getPhoneNumber() == null) && (!(member.getPhoneNumber().equals(""))) ? user.getPhoneNumber() : "등록되지 않았습니다.");
+                        textViewUserEmail.setText(member.getEmail());
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
         return root;
     }
