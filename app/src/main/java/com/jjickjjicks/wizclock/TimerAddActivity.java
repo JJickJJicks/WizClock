@@ -3,9 +3,17 @@ package com.jjickjjicks.wizclock;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -14,27 +22,97 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.ikovac.timepickerwithseconds.MyTimePickerDialog;
+import com.ikovac.timepickerwithseconds.TimePicker;
+import com.jjickjjicks.wizclock.data.adapter.SingleTimeDataAdapter;
+import com.jjickjjicks.wizclock.data.item.SingleTimeData;
 import com.jjickjjicks.wizclock.data.item.TimerData;
 import com.jjickjjicks.wizclock.data.item.TimerItem;
+import com.travijuu.numberpicker.library.NumberPicker;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+
+import br.com.simplepass.loading_button_lib.customViews.CircularProgressButton;
 
 
-public class TimerAddActivity extends AppCompatActivity {
+public class TimerAddActivity extends AppCompatActivity implements View.OnClickListener {
     private DatabaseReference databaseReference;
     private FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
     private long key = 0;
+
+    private EditText etTimerItemTitle, etTimerItemDescription;
+    private TextView tvAddItemWarning;
+    private Spinner spTimerItemType;
+    private RecyclerView recyclerTimerData;
+    private Button btnAddTimerData;
+    private NumberPicker npTimerDataCount;
+    private CircularProgressButton btnRegistTimerItem;
+    private TimerData timerData = new TimerData();
+    private ArrayList<SingleTimeData> singleTimeDataArrayList = new ArrayList<>();
+    private SingleTimeDataAdapter adapter = new SingleTimeDataAdapter();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timer_add);
 
-        RegisterTimerData("test", "test", 1, 1, new ArrayList<>(Arrays.asList(Long.valueOf(100), Long.valueOf(10))));
+        tvAddItemWarning = findViewById(R.id.tvAddItemWarning);
+        if (singleTimeDataArrayList.size() != 0)
+            tvAddItemWarning.setVisibility(View.INVISIBLE);
+        else
+            tvAddItemWarning.setVisibility(View.VISIBLE);
+
+        etTimerItemTitle = findViewById(R.id.etTimerItemTitle);
+        etTimerItemDescription = findViewById(R.id.etTimerItemDescription);
+        spTimerItemType = findViewById(R.id.spTimerItemType);
+        recyclerTimerData = findViewById(R.id.recyclerTimerData);
+        btnAddTimerData = findViewById(R.id.btnAddTimerData);
+        npTimerDataCount = findViewById(R.id.npTimerDataCount);
+        btnRegistTimerItem = findViewById(R.id.btnRegistTimerItem);
+
+        btnAddTimerData.setOnClickListener(this);
+        btnRegistTimerItem.setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View view) {
+        if (view.getId() == R.id.btnAddTimerData) {
+            MyTimePickerDialog mTimePicker = new MyTimePickerDialog(this, new MyTimePickerDialog.OnTimeSetListener() {
+                @Override
+                public void onTimeSet(TimePicker view, int hourOfDay, int minute, int seconds) {
+                    SingleTimeData singleTimeData = new SingleTimeData(hourOfDay, minute, seconds);
+
+                    singleTimeDataArrayList.add(singleTimeData);
+                    timerData.addTime(singleTimeData.getMiliSecond());
+
+                    recyclerTimerData.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+                    adapter = new SingleTimeDataAdapter(singleTimeDataArrayList);
+                    recyclerTimerData.setAdapter(adapter);
+
+                    if (singleTimeDataArrayList.size() != 0)
+                        tvAddItemWarning.setVisibility(View.INVISIBLE);
+                    else
+                        tvAddItemWarning.setVisibility(View.VISIBLE);
+                }
+            }, 0, 0, 0, true);
+            mTimePicker.show();
+        } else if (view.getId() == R.id.btnRegistTimerItem) {
+            String title = etTimerItemTitle.getText().toString();
+            String description = etTimerItemDescription.getText().toString();
+            if (!title.equals("") && !description.equals("") && adapter.getItemCount() != 0) {
+                int type = spTimerItemType.getSelectedItemPosition();
+                int timeCnt = npTimerDataCount.getValue();
+                ArrayList<Long> timeList = adapter.toArrayList();
+                RegisterTimerData(title, description, type, timeCnt, timeList);
+                Toast.makeText(this, "미구현", Toast.LENGTH_SHORT).show();
+                finish();
+            } else {
+                Toast.makeText(this, "모든 정보를 빠짐없이 입력해주세요", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void RegisterTimerData(final String title, final String description, final int type, final int timeCnt, final ArrayList<Long> timeList) {

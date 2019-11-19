@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="timer_item_type">
+        <item>Study</item>
+        <item>Health</item>
+        <item>Cook</item>
+        <item>ETC</item>
+    </string-array>
+</resources>

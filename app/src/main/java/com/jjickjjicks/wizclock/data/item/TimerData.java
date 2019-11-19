@@ -37,6 +37,7 @@ public class TimerData {
         }
     }
 
+
     public TimerData(int timeCnt, List<Long> timeList) {
         this.timeCnt = timeCnt;
         this.timeList = timeList;
@@ -48,6 +49,10 @@ public class TimerData {
 
     public void setmTimeLeftInMillis(ArrayList<Long> timeList) {
         this.timeList = timeList;
+    }
+
+    public void addTime(long miliSecond) {
+        timeList.add(miliSecond);
     }
 
     public int getTimeCnt() {

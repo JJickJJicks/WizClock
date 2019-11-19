@@ -10,10 +10,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TimerItem {
-    final private static int TYPE_ETC = 0;
-    final private static int TYPE_STUDY = 1;
-    final private static int TYPE_HEALTH = 2;
-    final private static int TYPE_COOK = 3;
+    final private static int TYPE_STUDY = 0;
+    final private static int TYPE_HEALTH = 1;
+    final private static int TYPE_COOK = 2;
+    final private static int TYPE_ETC = 3;
 
     private String title, describe, authorName, authorEmail;
     private long key;
@@ -98,14 +98,14 @@ public class TimerItem {
 
     public int getTypeIcon() {
         switch (this.type) {
-            default:
-                return R.drawable.ic_etc;
             case TYPE_STUDY:
                 return R.drawable.ic_study;
             case TYPE_HEALTH:
                 return R.drawable.ic_health;
             case TYPE_COOK:
                 return R.drawable.ic_cook;
+            default:
+                return R.drawable.ic_etc;
         }
     }
 
