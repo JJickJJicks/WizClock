@@ -107,7 +107,7 @@ public class TimerAddActivity extends AppCompatActivity implements View.OnClickL
                 int type = spTimerItemType.getSelectedItemPosition();
                 int timeCnt = npTimerDataCount.getValue();
                 ArrayList<Long> timeList = adapter.toArrayList();
-                RegisterTimerData(title, description, type, timeCnt, timeList);
+                RegisterTimerDataOnline(title, description, type, timeCnt, timeList);
                 Toast.makeText(this, "미구현", Toast.LENGTH_SHORT).show();
                 finish();
             } else {
@@ -116,7 +116,7 @@ public class TimerAddActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
-    private void RegisterTimerData(final String title, final String description, final int type, final int timeCnt, final ArrayList<Long> timeList) {
+    private void RegisterTimerDataOnline(final String title, final String description, final int type, final int timeCnt, final ArrayList<Long> timeList) {
         databaseReference = FirebaseDatabase.getInstance().getReference("timer");
 
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -128,41 +128,6 @@ public class TimerAddActivity extends AppCompatActivity implements View.OnClickL
                 }
                 TimerItem item = new TimerItem(key + 1, title, description, user.getEmail(), user.getDisplayName(), type, new TimerData(timeCnt, timeList));
                 databaseReference.child(String.valueOf(key + 1)).setValue(item.toMap());
-
-                SharedPreferences preferences = getSharedPreferences("TimerItem", 0);
-                SharedPreferences.Editor editor = preferences.edit();
-
-                ArrayList<String> keyList = new ArrayList<>();
-                String Json = preferences.getString("key", null);
-                if (Json != null) {
-                    Log.d("JsonSaveCheck 3", Json);
-                    try {
-                        JSONArray jsonArray = new JSONArray(Json);
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            keyList.add(jsonArray.optString(i));
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-                Log.d("JsonSaveCheck 2-1", keyList.toString());
-
-                keyList.add(String.valueOf(key + 1));
-                JSONArray jsonArray = new JSONArray();
-                for (String i : keyList) {
-                    jsonArray.put(i);
-                }
-
-                String keyJson = null;
-                if (!keyList.isEmpty())
-                    keyJson = jsonArray.toString();
-
-                Log.d("JsonSaveCheck 1", keyJson);
-
-                editor.putString("key", keyJson);
-                editor.putString(String.valueOf(key + 1), item.toString());
-                editor.apply();
-                Log.d("JsonSaveCheck", item.toString());
             }
 
             @Override
@@ -170,5 +135,44 @@ public class TimerAddActivity extends AppCompatActivity implements View.OnClickL
 
             }
         });
+    }
+
+
+    private void RegisterTimerDataOffline(final String title, final String description, final int type, final int timeCnt, final ArrayList<Long> timeList) {
+        TimerItem item = new TimerItem(key + 1, title, description, user.getEmail(), user.getDisplayName(), type, new TimerData(timeCnt, timeList));
+
+        SharedPreferences preferences = getSharedPreferences("TimerItem", 0);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        ArrayList<String> keyList = new ArrayList<>();
+        String Json = preferences.getString("key", null);
+        if (Json != null) {
+            Log.d("JsonSaveCheck 3", Json);
+            try {
+                JSONArray jsonArray = new JSONArray(Json);
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    keyList.add(jsonArray.optString(i));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        Log.d("JsonSaveCheck 2-1", keyList.toString());
+
+        keyList.add(String.valueOf(key + 1));
+        JSONArray jsonArray = new JSONArray();
+        for (String i : keyList) {
+            jsonArray.put(i);
+        }
+
+        String keyJson = null;
+        if (!keyList.isEmpty())
+            keyJson = jsonArray.toString();
+
+        Log.d("JsonSaveCheck 1", keyJson);
+
+        editor.putString("key", keyJson);
+        editor.putString(String.valueOf(key + 1), item.toString());
+        editor.apply();
     }
 }
