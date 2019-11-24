@@ -1,5 +1,6 @@
 package com.jjickjjicks.wizclock.ui.fragment;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,12 +24,15 @@ import com.google.firebase.database.ValueEventListener;
 import com.jjickjjicks.wizclock.R;
 import com.jjickjjicks.wizclock.data.item.Member;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
+
 
 public class ProfileFragment extends Fragment {
     private ImageView imageViewHeaderProfile;
     private TextView textViewUserName, textViewUserPhoneNumber, textViewUserEmail, textViewHeaderUserName, textViewHeaderUserEmail, textViewHeaderUserExp, textViewHeaderUserLevel;
     private ProgressBar progressBarHeaderUserExp;
     private FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+    private SweetAlertDialog pDialog;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -44,6 +48,7 @@ public class ProfileFragment extends Fragment {
         textViewHeaderUserLevel = root.findViewById(R.id.textViewHeaderUserLevel);
         progressBarHeaderUserExp = root.findViewById(R.id.progressBarHeaderUserExp);
 
+        StartProgress();
         final String userKey = user.getEmail().replace(".", "_");
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("users");
         databaseReference.addValueEventListener(new ValueEventListener() {
@@ -77,7 +82,20 @@ public class ProfileFragment extends Fragment {
 
             }
         });
+        StopProgress();
 
         return root;
+    }
+
+    private void StartProgress() {
+        pDialog = new SweetAlertDialog(getContext(), SweetAlertDialog.PROGRESS_TYPE);
+        pDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
+        pDialog.setTitleText("Loading");
+        pDialog.setCancelable(false);
+        pDialog.show();
+    }
+
+    private void StopProgress() {
+        pDialog.dismiss();
     }
 }

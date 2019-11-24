@@ -2,7 +2,6 @@ package com.jjickjjicks.wizclock.ui.activity;
 
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -19,21 +18,16 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.jjickjjicks.wizclock.BottomNavigationBehavior;
 import com.jjickjjicks.wizclock.DarkModePrefManager;
+import com.jjickjjicks.wizclock.R;
 import com.jjickjjicks.wizclock.ui.fragment.MainFragment;
 import com.jjickjjicks.wizclock.ui.fragment.ProfileFragment;
-import com.jjickjjicks.wizclock.R;
 import com.jjickjjicks.wizclock.ui.fragment.SearchFragment;
 import com.jjickjjicks.wizclock.ui.fragment.SettingsFragment;
 import com.jjickjjicks.wizclock.ui.fragment.TimerFragment;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-//    private FirebaseDatabase database = FirebaseDatabase.getInstance();
-//    private DatabaseReference myRef = database.getReference("users");
-
     private BottomNavigationView bottomNavigationView;
     private FragmentTransaction ft;
-    private EditText tvUserName;
-
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -81,12 +75,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        if (new DarkModePrefManager(this).isNightMode()) {
-//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-//        }
-
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         // 첫 화면 설정
@@ -96,13 +86,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         ft.commit();
 
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         bottomNavigationView = findViewById(R.id.navigation);
@@ -116,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -151,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }

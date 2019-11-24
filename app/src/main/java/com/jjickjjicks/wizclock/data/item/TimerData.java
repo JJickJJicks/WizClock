@@ -1,7 +1,5 @@
 package com.jjickjjicks.wizclock.data.item;
 
-import android.util.Log;
-
 import com.google.firebase.database.Exclude;
 
 import org.json.JSONArray;
@@ -25,7 +23,6 @@ public class TimerData {
 
     public TimerData(String Json) {
         try {
-            Log.d("JsonCheck 2", Json);
             JSONObject jsonObject = new JSONObject(Json);
             this.timeCnt = jsonObject.getInt("timeCnt");
             JSONArray timeListArr = jsonObject.getJSONArray("timeList");

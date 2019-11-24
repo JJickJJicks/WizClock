@@ -23,13 +23,12 @@ import com.jjickjjicks.wizclock.data.item.Member;
 public class MainFragment extends Fragment {
     private TextView tvUserName, tvUserLevel, tvUserExp;
     private ProgressBar pbUserExp;
-    private FirebaseUser user;
+    private FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_main, container, false);
 
         // Firebase 로드
-        user = FirebaseAuth.getInstance().getCurrentUser();
         tvUserName = root.findViewById(R.id.tvUserName);
         tvUserLevel = root.findViewById(R.id.tvUserLevel);
         tvUserExp = root.findViewById(R.id.tvUserExp);

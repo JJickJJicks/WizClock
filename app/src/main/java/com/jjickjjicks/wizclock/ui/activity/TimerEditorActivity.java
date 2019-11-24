@@ -1,16 +1,16 @@
 package com.jjickjjicks.wizclock.ui.activity;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -31,18 +31,20 @@ import com.jjickjjicks.wizclock.data.item.TimerData;
 import com.jjickjjicks.wizclock.data.item.TimerItem;
 import com.travijuu.numberpicker.library.NumberPicker;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Locale;
 
 import br.com.simplepass.loading_button_lib.customViews.CircularProgressButton;
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 
-public class TimerAddActivity extends AppCompatActivity implements View.OnClickListener {
+public class TimerEditorActivity extends AppCompatActivity implements View.OnClickListener {
+    final public static int MODE_ADD = 0, MODE_EDIT = 1;
+
     private DatabaseReference databaseReference;
     private FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-    private long key = 0;
 
     private EditText etTimerItemTitle, etTimerItemDescription;
     private TextView tvAddItemWarning;
@@ -58,7 +60,7 @@ public class TimerAddActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_timer_add);
+        setContentView(R.layout.activity_timer_editor);
 
         tvAddItemWarning = findViewById(R.id.tvAddItemWarning);
         if (singleTimeDataArrayList.size() != 0)
@@ -107,27 +109,53 @@ public class TimerAddActivity extends AppCompatActivity implements View.OnClickL
                 int type = spTimerItemType.getSelectedItemPosition();
                 int timeCnt = npTimerDataCount.getValue();
                 ArrayList<Long> timeList = adapter.toArrayList();
-                RegisterTimerDataOnline(title, description, type, timeCnt, timeList);
-                Toast.makeText(this, "미구현", Toast.LENGTH_SHORT).show();
-                finish();
+                RegisterTimerDataOffline(title, description, type, timeCnt, timeList);
             } else {
-                Toast.makeText(this, "모든 정보를 빠짐없이 입력해주세요", Toast.LENGTH_SHORT).show();
+                new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
+                        .setTitleText("무언가 빠졌어요!")
+                        .show();
             }
         }
     }
 
     private void RegisterTimerDataOnline(final String title, final String description, final int type, final int timeCnt, final ArrayList<Long> timeList) {
         databaseReference = FirebaseDatabase.getInstance().getReference("timer");
-
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    key = dataSnapshot.getChildrenCount();
-                    Log.d("JsonSaveCheck 2", String.valueOf(key));
-                }
-                TimerItem item = new TimerItem(key + 1, title, description, user.getEmail(), user.getDisplayName(), type, new TimerData(timeCnt, timeList));
-                databaseReference.child(String.valueOf(key + 1)).setValue(item.toMap());
+                final TimerItem item = new TimerItem(TimerItem.ONLINE, title, description, user.getDisplayName(), user.getEmail(), type, new TimerData(timeCnt, timeList));
+                databaseReference.push().setValue(item.toMap(), new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                        if (databaseError == null) {
+                            SharedPreferences preferences = getSharedPreferences("TimerItem", 0);
+                            SharedPreferences.Editor editor = preferences.edit();
+                            editor.putString(databaseReference.getKey(), item.toString());
+                            if (editor.commit()) {
+                                new SweetAlertDialog(TimerEditorActivity.this, SweetAlertDialog.SUCCESS_TYPE)
+                                        .setTitleText("추가되었습니다!")
+                                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                            @Override
+                                            public void onClick(SweetAlertDialog sDialog) {
+                                                Intent intent = new Intent();
+                                                setResult(RESULT_OK, intent);
+                                                sDialog.dismiss();
+                                                finish();
+                                            }
+                                        })
+                                        .show();
+                            } else {
+                                new SweetAlertDialog(TimerEditorActivity.this, SweetAlertDialog.ERROR_TYPE)
+                                        .setTitleText("문제가 발생했어요!")
+                                        .show();
+                            }
+                        } else {
+                            new SweetAlertDialog(TimerEditorActivity.this, SweetAlertDialog.ERROR_TYPE)
+                                    .setTitleText("문제가 발생했어요!")
+                                    .show();
+                        }
+                    }
+                });
             }
 
             @Override
@@ -139,40 +167,45 @@ public class TimerAddActivity extends AppCompatActivity implements View.OnClickL
 
 
     private void RegisterTimerDataOffline(final String title, final String description, final int type, final int timeCnt, final ArrayList<Long> timeList) {
-        TimerItem item = new TimerItem(key + 1, title, description, user.getEmail(), user.getDisplayName(), type, new TimerData(timeCnt, timeList));
-
-        SharedPreferences preferences = getSharedPreferences("TimerItem", 0);
+        final SharedPreferences preferences = getSharedPreferences("TimerItem", 0);
         SharedPreferences.Editor editor = preferences.edit();
 
-        ArrayList<String> keyList = new ArrayList<>();
-        String Json = preferences.getString("key", null);
-        if (Json != null) {
-            Log.d("JsonSaveCheck 3", Json);
-            try {
-                JSONArray jsonArray = new JSONArray(Json);
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    keyList.add(jsonArray.optString(i));
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+        TimerItem item = new TimerItem(TimerItem.OFFLINE, title, description, user.getDisplayName(), user.getEmail(), type, new TimerData(timeCnt, timeList));
+
+        final String key = new SimpleDateFormat("yyyyMMddHHmmss", Locale.KOREAN).format(Calendar.getInstance().getTime());
+        editor.putString(key, item.toString());
+        if (editor.commit()) {
+            new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
+                    .setTitleText("추가되었습니다!")
+                    .setContentText("다른 사람들과 공유하시겠어요?")
+                    .setConfirmText("네!")
+                    .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sDialog) {
+                            SharedPreferences.Editor remover = getSharedPreferences("TimerItem", 0).edit();
+                            remover.remove(key);
+                            if (remover.commit()) {
+                                RegisterTimerDataOnline(title, description, type, timeCnt, timeList);
+                                sDialog.dismiss();
+                            }
+                        }
+                    })
+                    .setCancelText("아니요")
+                    .showCancelButton(true)
+                    .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sDialog) {
+                            Intent intent = new Intent();
+                            setResult(RESULT_OK, intent);
+                            sDialog.dismiss();
+                            finish();
+                        }
+                    })
+                    .show();
+        } else {
+            new SweetAlertDialog(TimerEditorActivity.this, SweetAlertDialog.ERROR_TYPE)
+                    .setTitleText("문제가 발생했어요!")
+                    .show();
         }
-        Log.d("JsonSaveCheck 2-1", keyList.toString());
-
-        keyList.add(String.valueOf(key + 1));
-        JSONArray jsonArray = new JSONArray();
-        for (String i : keyList) {
-            jsonArray.put(i);
-        }
-
-        String keyJson = null;
-        if (!keyList.isEmpty())
-            keyJson = jsonArray.toString();
-
-        Log.d("JsonSaveCheck 1", keyJson);
-
-        editor.putString("key", keyJson);
-        editor.putString(String.valueOf(key + 1), item.toString());
-        editor.apply();
     }
 }

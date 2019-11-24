@@ -10,13 +10,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TimerItem {
-    final private static int TYPE_STUDY = 0;
-    final private static int TYPE_HEALTH = 1;
-    final private static int TYPE_COOK = 2;
-    final private static int TYPE_ETC = 3;
+    public final static int ONLINE = 0;
+    public final static int OFFLINE = 1;
+    final private static int TYPE_STUDY = 0, TYPE_HEALTH = 1, TYPE_COOK = 2, TYPE_ETC = 3;
 
     private String title, describe, authorName, authorEmail;
-    private long key;
+    private int onlineCheck;
     private TimerData timerData;
     private int type;
 
@@ -26,7 +25,7 @@ public class TimerItem {
     public TimerItem(String Json) {
         try {
             JSONObject jsonObject = new JSONObject(Json);
-            this.key = jsonObject.getLong("key");
+            this.onlineCheck = jsonObject.getInt("onlineCheck");
             this.title = jsonObject.getString("title");
             this.describe = jsonObject.getString("describe");
             this.authorName = jsonObject.getString("authorName");
@@ -39,7 +38,7 @@ public class TimerItem {
     }
 
     public TimerItem(HashMap<String, Object> map) {
-        this.key = (long) map.get("key");
+        this.onlineCheck = Integer.valueOf(map.get("onlineCheck").toString());
         this.title = map.get("title").toString();
         this.describe = map.get("describe").toString();
         this.authorName = map.get("authorName").toString();
@@ -48,8 +47,8 @@ public class TimerItem {
         this.timerData = new TimerData((String) map.get("timerData"));
     }
 
-    public TimerItem(long key, String title, String describe, String authorName, String authorEmail, int type, TimerData timerData) {
-        this.key = key;
+    public TimerItem(int onlineCheck, String title, String describe, String authorName, String authorEmail, int type, TimerData timerData) {
+        this.onlineCheck = onlineCheck;
         this.title = title;
         this.describe = describe;
         this.authorName = authorName;
@@ -58,8 +57,8 @@ public class TimerItem {
         this.timerData = timerData;
     }
 
-    public TimerItem(long key, String title, String describe, String authorName, String authorEmail, int type, String timerData) {
-        this.key = key;
+    public TimerItem(int onlineCheck, String title, String describe, String authorName, String authorEmail, int type, String timerData) {
+        this.onlineCheck = onlineCheck;
         this.title = title;
         this.describe = describe;
         this.authorName = authorName;
@@ -68,8 +67,8 @@ public class TimerItem {
         this.timerData = new TimerData(timerData);
     }
 
-    public long getKey() {
-        return key;
+    public int getOnlineCheck() {
+        return onlineCheck;
     }
 
     public String getTitle() {
@@ -112,7 +111,7 @@ public class TimerItem {
     @Exclude
     public Map<String, Object> toMap() {
         HashMap<String, Object> result = new HashMap<>();
-        result.put("key", key);
+        result.put("onlineCheck", onlineCheck);
         result.put("title", title);
         result.put("describe", describe);
         result.put("authorName", authorName);

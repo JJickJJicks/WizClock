@@ -1,11 +1,8 @@
 package com.jjickjjicks.wizclock.ui.fragment;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,23 +18,25 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.jjickjjicks.wizclock.R;
 import com.jjickjjicks.wizclock.data.adapter.TimerItemAdapter;
 import com.jjickjjicks.wizclock.data.item.TimerItem;
-import com.jjickjjicks.wizclock.ui.activity.TimerAddActivity;
-
-import org.json.JSONArray;
-import org.json.JSONException;
+import com.jjickjjicks.wizclock.ui.activity.TimerEditorActivity;
+import com.jjickjjicks.wizclock.ui.activity.TimerItemInfoActivity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
+
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 import static android.app.Activity.RESULT_OK;
 
 public class TimerFragment extends Fragment implements View.OnClickListener {
     final private int TIMER_CREATE = 1;
     private ArrayList<TimerItem> timerItmeList;
+    private ArrayList<String> keyList;
     private RecyclerView recyclerView;
     private TimerItemAdapter adapter;
-    private ItemTouchHelper.SimpleCallback deleteMotion = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
 
+    private ItemTouchHelper.SimpleCallback deleteMotion = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
         @Override
         public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
             return true;
@@ -46,52 +45,57 @@ public class TimerFragment extends Fragment implements View.OnClickListener {
         @Override
         public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
             final int position = viewHolder.getAdapterPosition();
-            new AlertDialog.Builder(getContext())
-                    .setTitle("삭제").setMessage("삭제하시겠습니까? 온라인 데이터는 삭제되지 않습니다.")
-                    .setPositiveButton("삭제", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            TimerItem timerItem = timerItmeList.get(position);
+            new SweetAlertDialog(getContext(), SweetAlertDialog.WARNING_TYPE)
+                    .setTitleText("삭제하시겠습니까?")
+                    .setContentText("오프라인만 삭제됩니다")
+                    .setConfirmText("삭제")
+                    .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sDialog) {
+                            String key = keyList.get(position);
                             timerItmeList.remove(position);
+                            keyList.remove(position);
 
                             SharedPreferences preferences = Objects.requireNonNull(getActivity()).getSharedPreferences("TimerItem", 0);
                             SharedPreferences.Editor editor = preferences.edit();
-
-                            // 오프라인 저장소에서도 삭제
-                            ArrayList<String> keyList = new ArrayList<>();
-                            String Json = preferences.getString("key", null);
-                            if (Json != null) {
-                                try {
-                                    JSONArray jsonArray = new JSONArray(Json);
-                                    for (int i = 0; i < jsonArray.length(); i++) {
-                                        keyList.add(jsonArray.optString(i));
-                                    }
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
+                            editor.remove(key);
+                            if (editor.commit()) {
+                                adapter.notifyItemRemoved(position);
+                                sDialog.setTitleText("삭제되었습니다!")
+                                        .setConfirmText("확인")
+                                        .setConfirmClickListener(null)
+                                        .changeAlertType(SweetAlertDialog.SUCCESS_TYPE);
+                            } else {
+                                sDialog.setTitleText("문제가 발생했어요!")
+                                        .setConfirmText("확인")
+                                        .setConfirmClickListener(null)
+                                        .changeAlertType(SweetAlertDialog.ERROR_TYPE);
                             }
-                            keyList.remove(String.valueOf(timerItem.getKey()));
-                            JSONArray jsonArray = new JSONArray();
-                            for (String i : keyList) {
-                                jsonArray.put(i);
-                            }
-                            String keyJson = "[]";
-                            if (!keyList.isEmpty())
-                                keyJson = jsonArray.toString();
-                            editor.putString("key", keyJson);
-                            editor.remove(String.valueOf(timerItem.getKey()));
-                            editor.apply();
-
-                            adapter.notifyItemRemoved(position);
-                        }
-                    })
-                    .setNegativeButton("취소", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            updateUI();
                         }
                     })
                     .show();
         }
     };
+
+    private ItemTouchHelper.SimpleCallback editMotion = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+            return true;
+        }
+
+        @Override
+        public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
+            final int position = viewHolder.getAdapterPosition();
+
+            Intent intent = new Intent(getContext(), TimerItemInfoActivity.class);
+            intent.putExtra("mode", TimerItemInfoActivity.ONLINE_MODE);
+            intent.putExtra("key", keyList.get(position));
+            intent.putExtra("onlineCheck", timerItmeList.get(position).getType());
+            startActivity(intent);
+            updateUI();
+        }
+    };
+
     private TextView btnTimerAdd;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -102,13 +106,10 @@ public class TimerFragment extends Fragment implements View.OnClickListener {
         btnTimerAdd = root.findViewById(R.id.btnTimerAdd);
 
         btnTimerAdd.setOnClickListener(this);
-
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-
-        // setup swipe to remove item
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(deleteMotion);
-        itemTouchHelper.attachToRecyclerView(recyclerView);
+        new ItemTouchHelper(deleteMotion).attachToRecyclerView(recyclerView);
+        new ItemTouchHelper(editMotion).attachToRecyclerView(recyclerView);
 
         updateUI();
 
@@ -121,19 +122,8 @@ public class TimerFragment extends Fragment implements View.OnClickListener {
 
         SharedPreferences preferences = Objects.requireNonNull(getActivity()).getSharedPreferences("TimerItem", 0);
 
-        ArrayList<String> keyList = new ArrayList<>();
-        String Json = preferences.getString("key", null);
-        if (Json != null) {
-            Log.d("JsonCheck", Json);
-            try {
-                JSONArray jsonArray = new JSONArray(Json);
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    keyList.add(jsonArray.optString(i));
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
+        HashMap<String, Object> data = new HashMap<>(preferences.getAll());
+        keyList = new ArrayList<>(data.keySet());
 
         for (String key : keyList) {
             String JsonLoad = preferences.getString(key, null);
@@ -147,7 +137,7 @@ public class TimerFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View view) {
         if (view.getId() == R.id.btnTimerAdd) {
-            Intent intent = new Intent(getContext(), TimerAddActivity.class);
+            Intent intent = new Intent(getContext(), TimerEditorActivity.class);
             startActivityForResult(intent, TIMER_CREATE);
         }
     }
@@ -157,7 +147,7 @@ public class TimerFragment extends Fragment implements View.OnClickListener {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == TIMER_CREATE && resultCode == RESULT_OK) {
-
+            updateUI();
         }
     }
 }

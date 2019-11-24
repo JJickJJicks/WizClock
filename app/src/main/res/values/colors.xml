@@ -43,4 +43,15 @@
 
     <!--colors for light mode-->
     <color name="miniDescription">#707070</color>
+
+    <color name="colorWhite1">#F7F7F7</color>
+    <color name="windowBackground">#FFFFFF</color>
+    <color name="colortext">#eeeeee</color>
+    <color name="color_menufont">#555555</color>
+    <color name="pro_cart_textcolor">#b8b8b8</color>
+    <color name="color_cartimg_back">#eeeeee</color>->
+    <color name="color_button">#ddba76</color>
+    <color name="colorWhite">#FFFFFF</color>
+    <color name="color_layout">#f0f1f5</color>
+    <color name="coloraction">#ddba76</color>
 </resources>
