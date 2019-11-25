@@ -2,6 +2,7 @@ package com.jjickjjicks.wizclock.ui.activity;
 
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -21,6 +22,7 @@ import com.google.android.material.navigation.NavigationView;
 import com.jjickjjicks.wizclock.BottomNavigationBehavior;
 import com.jjickjjicks.wizclock.DarkModePrefManager;
 import com.jjickjjicks.wizclock.R;
+import com.jjickjjicks.wizclock.data.AccessSettings;
 import com.jjickjjicks.wizclock.ui.fragment.MainFragment;
 import com.jjickjjicks.wizclock.ui.fragment.ProfileFragment;
 import com.jjickjjicks.wizclock.ui.fragment.SearchFragment;
@@ -77,6 +79,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //TODO : 전역변수 정상 작동 TEST
+        if(AccessSettings.getAccessMode() == AccessSettings.ONLINE_ACCESS)
+            Toast.makeText(this, "online", Toast.LENGTH_SHORT).show();
 
         Fabric.with(this, new Crashlytics());
 

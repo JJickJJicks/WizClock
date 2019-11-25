@@ -54,4 +54,7 @@
     <color name="colorWhite">#FFFFFF</color>
     <color name="color_layout">#f0f1f5</color>
     <color name="coloraction">#ddba76</color>
+
+    <color name="df_transparent_black_background">#80000000</color>
+    <color name="whiteCardColor">#fff</color>
 </resources>
