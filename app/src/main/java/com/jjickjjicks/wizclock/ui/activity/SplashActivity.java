@@ -6,12 +6,12 @@ import android.os.Handler;
 
 import com.jjickjjicks.wizclock.ui.dialog.InternetDialog;
 import com.jjickjjicks.wizclock.R;
-import com.jjickjjicks.wizclock.data.AccessSettings;
+import com.jjickjjicks.wizclock.data.item.AccessSettings;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import static com.jjickjjicks.wizclock.data.AccessSettings.OFFLINE_ACCESS;
-import static com.jjickjjicks.wizclock.data.AccessSettings.ONLINE_ACCESS;
+import static com.jjickjjicks.wizclock.data.item.AccessSettings.OFFLINE_ACCESS;
+import static com.jjickjjicks.wizclock.data.item.AccessSettings.ONLINE_ACCESS;
 
 public class SplashActivity extends AppCompatActivity {
     private final int SPLASH_DISPLAY_TIME = 3000;
@@ -25,14 +25,15 @@ public class SplashActivity extends AppCompatActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
+                AccessSettings accessSettings = new AccessSettings();
                 if (new InternetDialog(SplashActivity.this).getInternetStatus()) {
                     Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
-                    AccessSettings.setAccessMode(ONLINE_ACCESS);
+                    accessSettings.setAccessMode(ONLINE_ACCESS);
                     startActivity(intent);
                     finish();
                 } else {
                     Intent intent = new Intent(SplashActivity.this, MainActivity.class);
-                    AccessSettings.setAccessMode(OFFLINE_ACCESS);
+                    accessSettings.setAccessMode(OFFLINE_ACCESS);
                     startActivity(intent);
                     finish();
                 }

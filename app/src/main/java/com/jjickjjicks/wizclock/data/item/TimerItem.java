@@ -10,8 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TimerItem {
-    public final static int ONLINE = 0;
-    public final static int OFFLINE = 1;
+    public final static int ONLINE = 0, OFFLINE = 1;
     final private static int TYPE_STUDY = 0, TYPE_HEALTH = 1, TYPE_COOK = 2, TYPE_ETC = 3;
 
     private String title, describe, authorName, authorEmail;

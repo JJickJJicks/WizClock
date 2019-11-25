@@ -66,9 +66,8 @@ public class TimerSearchAdapter extends RecyclerView.Adapter<TimerSearchAdapter.
                     int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION) {
                         Intent intent = new Intent(context, TimerItemInfoActivity.class);
-                        intent.putExtra("mode", TimerItemInfoActivity.ONLINE_MODE);
+                        intent.putExtra("mode", TimerItem.ONLINE);
                         intent.putExtra("key", keyList.get(position));
-                        intent.putExtra("onlineCheck", TimerItem.ONLINE);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         context.startActivity(intent);
                     }

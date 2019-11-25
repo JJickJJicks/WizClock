@@ -1,8 +1,22 @@
 package com.jjickjjicks.wizclock.ui.activity;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.Toast;
+
+import com.crashlytics.android.Crashlytics;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationView;
+import com.jjickjjicks.wizclock.BottomNavigationBehavior;
+import com.jjickjjicks.wizclock.DarkModePrefManager;
+import com.jjickjjicks.wizclock.R;
+import com.jjickjjicks.wizclock.data.item.AccessSettings;
+import com.jjickjjicks.wizclock.ui.fragment.MainFragment;
+import com.jjickjjicks.wizclock.ui.fragment.ProfileFragment;
+import com.jjickjjicks.wizclock.ui.fragment.SearchFragment;
+import com.jjickjjicks.wizclock.ui.fragment.SettingsFragment;
+import com.jjickjjicks.wizclock.ui.fragment.TimerFragment;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -16,19 +30,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import io.fabric.sdk.android.Fabric;
 
-import com.crashlytics.android.Crashlytics;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.navigation.NavigationView;
-import com.jjickjjicks.wizclock.BottomNavigationBehavior;
-import com.jjickjjicks.wizclock.DarkModePrefManager;
-import com.jjickjjicks.wizclock.R;
-import com.jjickjjicks.wizclock.data.AccessSettings;
-import com.jjickjjicks.wizclock.ui.fragment.MainFragment;
-import com.jjickjjicks.wizclock.ui.fragment.ProfileFragment;
-import com.jjickjjicks.wizclock.ui.fragment.SearchFragment;
-import com.jjickjjicks.wizclock.ui.fragment.SettingsFragment;
-import com.jjickjjicks.wizclock.ui.fragment.TimerFragment;
-
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private BottomNavigationView bottomNavigationView;
     private FragmentTransaction ft;
@@ -40,20 +41,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             Fragment fragment;
             switch (item.getItemId()) {
-                case R.id.navigationMyProfile:
-                    fragment = new ProfileFragment();
-                    ft = getSupportFragmentManager().beginTransaction();
-                    ft.replace(R.id.content_fragment_layout, fragment);
-                    ft.commit();
-                    return true;
-                case R.id.navigationMyCourses:
+                case R.id.navigationTimer:
                     fragment = new TimerFragment();
-                    ft = getSupportFragmentManager().beginTransaction();
-                    ft.replace(R.id.content_fragment_layout, fragment);
-                    ft.commit();
-                    return true;
-                case R.id.navigationHome:
-                    fragment = new MainFragment();
                     ft = getSupportFragmentManager().beginTransaction();
                     ft.replace(R.id.content_fragment_layout, fragment);
                     ft.commit();
@@ -64,7 +53,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     ft.replace(R.id.content_fragment_layout, fragment);
                     ft.commit();
                     return true;
-                case R.id.navigationMenu:
+                case R.id.navigationHome:
+                    fragment = new MainFragment();
+                    ft = getSupportFragmentManager().beginTransaction();
+                    ft.replace(R.id.content_fragment_layout, fragment);
+                    ft.commit();
+                    return true;
+                case R.id.navigationMyProfile:
+                    fragment = new ProfileFragment();
+                    ft = getSupportFragmentManager().beginTransaction();
+                    ft.replace(R.id.content_fragment_layout, fragment);
+                    ft.commit();
+                    return true;
+                case R.id.navigationSetting:
                     fragment = new SettingsFragment();
                     ft = getSupportFragmentManager().beginTransaction();
                     ft.replace(R.id.content_fragment_layout, fragment);
@@ -80,21 +81,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //TODO : 전역변수 정상 작동 TEST
-        if(AccessSettings.getAccessMode() == AccessSettings.ONLINE_ACCESS)
-            Toast.makeText(this, "online", Toast.LENGTH_SHORT).show();
-
         Fabric.with(this, new Crashlytics());
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        // 첫 화면 설정
-        Fragment fragment = new MainFragment();
-        ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.content_fragment_layout, fragment);
-        ft.commit();
-
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -111,7 +101,36 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) bottomNavigationView.getLayoutParams();
         layoutParams.setBehavior(new BottomNavigationBehavior());
 
-        bottomNavigationView.setSelectedItemId(R.id.navigationHome);
+        Fragment fragment;
+
+        //TODO : 전역변수 정상 작동 TEST
+        AccessSettings accessSettings = new AccessSettings();
+
+        //온라인일 경우 전체 사용 가능
+        if (accessSettings.getAccessMode() == accessSettings.ONLINE_ACCESS) {
+            Toast.makeText(this, "online", Toast.LENGTH_SHORT).show();
+
+            fragment = new MainFragment();
+            ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.content_fragment_layout, fragment);
+            ft.commit();
+
+            bottomNavigationView.setSelectedItemId(R.id.navigationHome);
+        } else { // 오프라인일 경우 timer fragment만 사용 가능
+            fragment = new TimerFragment();
+            ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.content_fragment_layout, fragment);
+            ft.commit();
+
+            bottomNavigationView.setSelectedItemId(R.id.navigationTimer);
+            bottomNavigationView.setEnabled(false);
+            bottomNavigationView.setFocusable(false);
+            bottomNavigationView.setClickable(false);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                bottomNavigationView.setContextClickable(false);
+            }
+            bottomNavigationView.setOnClickListener(null);
+        }
     }
 
     @Override
@@ -125,6 +144,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
+    // 추후 search menu로 활용할 예정
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {

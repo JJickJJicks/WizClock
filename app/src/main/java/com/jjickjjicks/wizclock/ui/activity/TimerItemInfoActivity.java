@@ -16,6 +16,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -23,9 +25,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.jjickjjicks.wizclock.R;
 import com.jjickjjicks.wizclock.data.adapter.SingleTimeDataAdapter;
 import com.jjickjjicks.wizclock.data.adapter.TimeInfoDataAdatper;
+import com.jjickjjicks.wizclock.data.item.AccessSettings;
 import com.jjickjjicks.wizclock.data.item.SingleTimeData;
 import com.jjickjjicks.wizclock.data.item.TimerData;
 import com.jjickjjicks.wizclock.data.item.TimerItem;
@@ -38,7 +42,6 @@ import cn.pedant.SweetAlert.SweetAlertDialog;
 import io.fabric.sdk.android.Fabric;
 
 public class TimerItemInfoActivity extends AppCompatActivity implements View.OnClickListener {
-    final static public int ONLINE_MODE = 0, OFFLINE_MODE = 1;
     final static private int TIMER_EDIT = 10;
 
     private TextView tvTimerItemName, tvTimerItemDescription, tvAuthorName, tvAuthorEmail, tvType, tvRecursive;
@@ -47,7 +50,7 @@ public class TimerItemInfoActivity extends AppCompatActivity implements View.OnC
     private FirebaseUser user;
     private TimerItem timerItem;
     private String key;
-    private int onlineCheck = 0, mode = 0;
+    private int mode = 0;
     private ArrayList<SingleTimeData> singleTimeDataArrayList = new ArrayList<>();
     private TimeInfoDataAdatper adapter = new TimeInfoDataAdatper();
 
@@ -78,7 +81,6 @@ public class TimerItemInfoActivity extends AppCompatActivity implements View.OnC
         Intent intent = getIntent();
         key = intent.getStringExtra("key");
         mode = intent.getIntExtra("mode", 0);
-        onlineCheck = intent.getIntExtra("onlineCheck", 0);
 
         getUI(key);
     }
@@ -86,20 +88,23 @@ public class TimerItemInfoActivity extends AppCompatActivity implements View.OnC
     private void checkOwn(final String key) {
         SharedPreferences preferences = getSharedPreferences("TimerItem", 0);
         HashMap<String, Object> data = new HashMap<>(preferences.getAll());
-        if (data.containsKey(key))
-            btnAddTimerItem.setEnabled(false);
-        else
+
+        AccessSettings accessSettings = new AccessSettings();
+        if (accessSettings.getAccessMode() == accessSettings.ONLINE_ACCESS && !data.containsKey(key))
             btnAddTimerItem.setEnabled(true);
+        else
+            btnAddTimerItem.setEnabled(false);
     }
 
     private void getUI(final String key) {
         checkOwn(key);
-        if (mode == ONLINE_MODE)
+        if (mode == TimerItem.ONLINE)
             getOnlineUI(key);
         else
             getOfflineUI(key);
     }
 
+    // 아이템 설정이 online임과 동시에 현재 상태가 online일 때 활성화 되는 UI
     private void getOnlineUI(final String key) {
         user = FirebaseAuth.getInstance().getCurrentUser();
         Log.d("Check", "Method Load Complete");
@@ -128,7 +133,7 @@ public class TimerItemInfoActivity extends AppCompatActivity implements View.OnC
                         tvRecursive.setText(String.valueOf(timerData.getTimeCnt()));
 
                         ArrayList<Long> timeList = timerData.getTimeList();
-                        for(long i : timeList)
+                        for (long i : timeList)
                             singleTimeDataArrayList.add(new SingleTimeData(i));
 
                         rvTimerItem.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -146,6 +151,7 @@ public class TimerItemInfoActivity extends AppCompatActivity implements View.OnC
         });
     }
 
+    // 아이템 설정이 offline이거나 현재 설정이 offline일때 출력되는 ui
     private void getOfflineUI(final String key) {
         SharedPreferences preferences = getSharedPreferences("TimerItem", 0);
 
@@ -182,20 +188,32 @@ public class TimerItemInfoActivity extends AppCompatActivity implements View.OnC
             SharedPreferences.Editor editor = preferences.edit();
             editor.putString(key, timerItem.toString());
             if (editor.commit()) {
-                new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
-                        .setTitleText("추가되었습니다!")
-                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                FirebaseMessaging.getInstance().subscribeToTopic(key)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
-                            public void onClick(SweetAlertDialog sDialog) {
-                                Intent intent = new Intent();
-                                setResult(RESULT_OK, intent);
-                                sDialog.dismiss();
-                                finish();
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    new SweetAlertDialog(TimerItemInfoActivity.this, SweetAlertDialog.SUCCESS_TYPE)
+                                            .setTitleText("추가되었습니다!")
+                                            .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                                @Override
+                                                public void onClick(SweetAlertDialog sDialog) {
+                                                    Intent intent = new Intent();
+                                                    setResult(RESULT_OK, intent);
+                                                    sDialog.dismiss();
+                                                    finish();
+                                                }
+                                            })
+                                            .show();
+                                } else {
+                                    new SweetAlertDialog(TimerItemInfoActivity.this, SweetAlertDialog.ERROR_TYPE)
+                                            .setTitleText("문제가 발생했어요!")
+                                            .show();
+                                }
                             }
-                        })
-                        .show();
+                        });
             } else {
-                new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
+                new SweetAlertDialog(TimerItemInfoActivity.this, SweetAlertDialog.ERROR_TYPE)
                         .setTitleText("문제가 발생했어요!")
                         .show();
             }

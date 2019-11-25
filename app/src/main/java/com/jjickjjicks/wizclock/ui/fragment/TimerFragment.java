@@ -88,9 +88,8 @@ public class TimerFragment extends Fragment implements View.OnClickListener {
             final int position = viewHolder.getAdapterPosition();
 
             Intent intent = new Intent(getContext(), TimerItemInfoActivity.class);
-            intent.putExtra("mode", TimerItemInfoActivity.ONLINE_MODE);
+            intent.putExtra("mode", timerItmeList.get(position).getType());
             intent.putExtra("key", keyList.get(position));
-            intent.putExtra("onlineCheck", timerItmeList.get(position).getType());
             startActivity(intent);
             updateUI();
         }

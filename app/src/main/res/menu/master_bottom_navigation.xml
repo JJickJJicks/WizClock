@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/navigationMyCourses"
+        android:id="@+id/navigationTimer"
         android:icon="@drawable/ic_alarm"
         android:title="Timer" />
     <item
@@ -17,7 +17,7 @@
         android:icon="@drawable/ic_user"
         android:title="Profile" />
     <item
-        android:id="@+id/navigationMenu"
+        android:id="@+id/navigationSetting"
         android:icon="@drawable/ic_setting"
         android:title="Settings" />
 </menu>
