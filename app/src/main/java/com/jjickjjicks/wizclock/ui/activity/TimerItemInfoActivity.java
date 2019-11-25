@@ -12,8 +12,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -22,13 +24,18 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.jjickjjicks.wizclock.R;
+import com.jjickjjicks.wizclock.data.adapter.SingleTimeDataAdapter;
+import com.jjickjjicks.wizclock.data.adapter.TimeInfoDataAdatper;
+import com.jjickjjicks.wizclock.data.item.SingleTimeData;
 import com.jjickjjicks.wizclock.data.item.TimerData;
 import com.jjickjjicks.wizclock.data.item.TimerItem;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
+import io.fabric.sdk.android.Fabric;
 
 public class TimerItemInfoActivity extends AppCompatActivity implements View.OnClickListener {
     final static public int ONLINE_MODE = 0, OFFLINE_MODE = 1;
@@ -41,11 +48,16 @@ public class TimerItemInfoActivity extends AppCompatActivity implements View.OnC
     private TimerItem timerItem;
     private String key;
     private int onlineCheck = 0, mode = 0;
+    private ArrayList<SingleTimeData> singleTimeDataArrayList = new ArrayList<>();
+    private TimeInfoDataAdatper adapter = new TimeInfoDataAdatper();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timer_item_info);
+
+        Fabric.with(this, new Crashlytics());
+
         setTitle("Timer Item Information");
 
         tvTimerItemName = findViewById(R.id.tvTimerItemName);
@@ -114,6 +126,15 @@ public class TimerItemInfoActivity extends AppCompatActivity implements View.OnC
                         tvAuthorEmail.setText(timerItem.getAuthorEmail());
                         tvType.setText(String.valueOf(timerItem.getType()));
                         tvRecursive.setText(String.valueOf(timerData.getTimeCnt()));
+
+                        ArrayList<Long> timeList = timerData.getTimeList();
+                        for(long i : timeList)
+                            singleTimeDataArrayList.add(new SingleTimeData(i));
+
+                        rvTimerItem.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+                        adapter = new TimeInfoDataAdatper(singleTimeDataArrayList);
+                        rvTimerItem.setAdapter(adapter);
+
                     }
                 }
             }

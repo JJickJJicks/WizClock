@@ -7,16 +7,21 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.crashlytics.android.Crashlytics;
 import com.jjickjjicks.wizclock.R;
 import com.jjickjjicks.wizclock.ui.activity.LoginActivity;
 
 import androidx.appcompat.app.AppCompatActivity;
+import io.fabric.sdk.android.Fabric;
 
 public class RegisterActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+
+        Fabric.with(this, new Crashlytics());
+
         changeStatusBarColor();
     }
 

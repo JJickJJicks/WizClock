@@ -289,7 +289,7 @@
                         android:layout_weight="1"
                         android:padding="5dp"
                         android:textColor="@color/pro_cart_textcolor"
-                        android:textSize="12dp" />
+                        android:textSize="12sp" />
                 </LinearLayout>
 
 

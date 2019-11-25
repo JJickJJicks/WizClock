@@ -15,6 +15,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "652178023046-0mrf9bi2bvpk6mijcmlohjo5oedq8ohb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jjickjjicks.wizclock",
+            "certificate_hash": "6dee843a27964f779d3eec3124823b30601d33f3"
+          }
+        },
+        {
+          "client_id": "652178023046-jmtmnr2uahomeve56nfbpcg2ut3vbuql.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jjickjjicks.wizclock",
+            "certificate_hash": "b75ec96afad38f8875813fbc170255fbb9cf78d4"
+          }
+        },
+        {
           "client_id": "652178023046-s4pi35gp2oi358k7e5ph2mfapb2k5dtl.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

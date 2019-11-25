@@ -8,17 +8,15 @@
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:networkSecurityConfig="@xml/network_security_config"
         android:label="@string/app_name"
-        tools:replace="android:icon"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~6300978111" />
-
-        <activity android:name=".ui.activity.TimerItemInfoActivity"></activity>
+        android:theme="@style/AppTheme"
+        tools:replace="android:icon">
+        <activity android:name=".SplashActivity"></activity>
+        <activity android:name=".ui.activity.TimerActionActivity" />
+        <activity android:name=".ui.activity.TimerItemInfoActivity" />
         <activity
             android:name=".ui.activity.TimerEditorActivity"
             android:theme="@style/AppTheme.NoActionBar" />
@@ -27,6 +25,7 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -37,6 +36,10 @@
             android:name=".ui.activity.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" />
+
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~6300978111" />
     </application>
 
 </manifest>
