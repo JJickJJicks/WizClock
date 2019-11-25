@@ -26,10 +26,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.jjickjjicks.wizclock.AccessSettings;
 import com.jjickjjicks.wizclock.R;
-import com.jjickjjicks.wizclock.data.adapter.SingleTimeDataAdapter;
 import com.jjickjjicks.wizclock.data.adapter.TimeInfoDataAdatper;
-import com.jjickjjicks.wizclock.data.item.AccessSettings;
 import com.jjickjjicks.wizclock.data.item.SingleTimeData;
 import com.jjickjjicks.wizclock.data.item.TimerData;
 import com.jjickjjicks.wizclock.data.item.TimerItem;
@@ -89,8 +88,7 @@ public class TimerItemInfoActivity extends AppCompatActivity implements View.OnC
         SharedPreferences preferences = getSharedPreferences("TimerItem", 0);
         HashMap<String, Object> data = new HashMap<>(preferences.getAll());
 
-        AccessSettings accessSettings = new AccessSettings();
-        if (accessSettings.getAccessMode() == accessSettings.ONLINE_ACCESS && !data.containsKey(key))
+        if (((AccessSettings) this.getApplication()).getAccessMode() == AccessSettings.ONLINE_ACCESS && !data.containsKey(key))
             btnAddTimerItem.setEnabled(true);
         else
             btnAddTimerItem.setEnabled(false);

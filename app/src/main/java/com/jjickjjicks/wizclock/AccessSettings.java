@@ -1,4 +1,4 @@
-package com.jjickjjicks.wizclock.data.item;
+package com.jjickjjicks.wizclock;
 
 import android.app.Application;
 

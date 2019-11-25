@@ -1,5 +1,6 @@
 package com.jjickjjicks.wizclock.ui.dialog;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -32,6 +33,9 @@ public class InternetDialog {
             @Override
             public void onClick(View view) {
                 dialog1.dismiss();
+                Intent intent = new Intent(context, MainActivity.class);
+                context.startActivity(intent);
+                ((Activity) context).finish();
             }
         });
         dialog1.show();

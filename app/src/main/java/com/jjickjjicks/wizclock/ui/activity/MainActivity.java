@@ -3,20 +3,6 @@ package com.jjickjjicks.wizclock.ui.activity;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.widget.Toast;
-
-import com.crashlytics.android.Crashlytics;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.navigation.NavigationView;
-import com.jjickjjicks.wizclock.BottomNavigationBehavior;
-import com.jjickjjicks.wizclock.DarkModePrefManager;
-import com.jjickjjicks.wizclock.R;
-import com.jjickjjicks.wizclock.data.item.AccessSettings;
-import com.jjickjjicks.wizclock.ui.fragment.MainFragment;
-import com.jjickjjicks.wizclock.ui.fragment.ProfileFragment;
-import com.jjickjjicks.wizclock.ui.fragment.SearchFragment;
-import com.jjickjjicks.wizclock.ui.fragment.SettingsFragment;
-import com.jjickjjicks.wizclock.ui.fragment.TimerFragment;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -28,6 +14,20 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+
+import com.crashlytics.android.Crashlytics;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationView;
+import com.jjickjjicks.wizclock.AccessSettings;
+import com.jjickjjicks.wizclock.BottomNavigationBehavior;
+import com.jjickjjicks.wizclock.DarkModePrefManager;
+import com.jjickjjicks.wizclock.R;
+import com.jjickjjicks.wizclock.ui.fragment.MainFragment;
+import com.jjickjjicks.wizclock.ui.fragment.ProfileFragment;
+import com.jjickjjicks.wizclock.ui.fragment.SearchFragment;
+import com.jjickjjicks.wizclock.ui.fragment.SettingsFragment;
+import com.jjickjjicks.wizclock.ui.fragment.TimerFragment;
+
 import io.fabric.sdk.android.Fabric;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             Fragment fragment;
+
             switch (item.getItemId()) {
                 case R.id.navigationTimer:
                     fragment = new TimerFragment();
@@ -103,13 +104,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         Fragment fragment;
 
-        //TODO : 전역변수 정상 작동 TEST
-        AccessSettings accessSettings = new AccessSettings();
-
         //온라인일 경우 전체 사용 가능
-        if (accessSettings.getAccessMode() == accessSettings.ONLINE_ACCESS) {
-            Toast.makeText(this, "online", Toast.LENGTH_SHORT).show();
-
+        if (((AccessSettings) this.getApplication()).getAccessMode() == AccessSettings.ONLINE_ACCESS) {
             fragment = new MainFragment();
             ft = getSupportFragmentManager().beginTransaction();
             ft.replace(R.id.content_fragment_layout, fragment);

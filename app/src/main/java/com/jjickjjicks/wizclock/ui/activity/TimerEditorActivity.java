@@ -9,7 +9,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -30,9 +29,9 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.ikovac.timepickerwithseconds.MyTimePickerDialog;
 import com.ikovac.timepickerwithseconds.TimePicker;
+import com.jjickjjicks.wizclock.AccessSettings;
 import com.jjickjjicks.wizclock.R;
 import com.jjickjjicks.wizclock.data.adapter.SingleTimeDataAdapter;
-import com.jjickjjicks.wizclock.data.item.AccessSettings;
 import com.jjickjjicks.wizclock.data.item.SingleTimeData;
 import com.jjickjjicks.wizclock.data.item.TimerData;
 import com.jjickjjicks.wizclock.data.item.TimerItem;
@@ -199,8 +198,7 @@ public class TimerEditorActivity extends AppCompatActivity implements View.OnCli
         final String key = new SimpleDateFormat("yyyyMMddHHmmss", Locale.KOREAN).format(Calendar.getInstance().getTime());
         editor.putString(key, item.toString());
         if (editor.commit()) {
-            AccessSettings accessSettings = new AccessSettings();
-            if (accessSettings.getAccessMode() == accessSettings.ONLINE_ACCESS) {
+            if (((AccessSettings) this.getApplication()).getAccessMode() == AccessSettings.ONLINE_ACCESS) {
                 new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
                         .setTitleText("추가되었습니다!")
                         .setContentText("다른 사람들과 공유하시겠어요?")

@@ -4,14 +4,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 
-import com.jjickjjicks.wizclock.ui.dialog.InternetDialog;
-import com.jjickjjicks.wizclock.R;
-import com.jjickjjicks.wizclock.data.item.AccessSettings;
-
 import androidx.appcompat.app.AppCompatActivity;
 
-import static com.jjickjjicks.wizclock.data.item.AccessSettings.OFFLINE_ACCESS;
-import static com.jjickjjicks.wizclock.data.item.AccessSettings.ONLINE_ACCESS;
+import com.jjickjjicks.wizclock.AccessSettings;
+import com.jjickjjicks.wizclock.R;
+import com.jjickjjicks.wizclock.ui.dialog.InternetDialog;
+
 
 public class SplashActivity extends AppCompatActivity {
     private final int SPLASH_DISPLAY_TIME = 3000;
@@ -25,21 +23,25 @@ public class SplashActivity extends AppCompatActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                AccessSettings accessSettings = new AccessSettings();
                 if (new InternetDialog(SplashActivity.this).getInternetStatus()) {
-                    Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
-                    accessSettings.setAccessMode(ONLINE_ACCESS);
-                    startActivity(intent);
-                    finish();
+                    onlineProcess();
                 } else {
-                    Intent intent = new Intent(SplashActivity.this, MainActivity.class);
-                    accessSettings.setAccessMode(OFFLINE_ACCESS);
-                    startActivity(intent);
-                    finish();
+                    offlineProcess();
                 }
             }
         }, SPLASH_DISPLAY_TIME);
 
 
+    }
+
+    public void onlineProcess() {
+        Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
+        ((AccessSettings) this.getApplication()).setAccessMode(AccessSettings.ONLINE_ACCESS);
+        startActivity(intent);
+        this.finish();
+    }
+
+    public void offlineProcess() {
+        ((AccessSettings) this.getApplication()).setAccessMode(AccessSettings.OFFLINE_ACCESS);
     }
 }
