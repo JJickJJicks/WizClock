@@ -2,7 +2,7 @@
 //
 //import android.app.Notification;
 //import android.app.NotificationChannel;
-//import android.app.NotificationManager;
+//import android.app.AppNotificationManager;
 //import android.content.ContentResolver;
 //import android.content.Context;
 //import android.graphics.BitmapFactory;
@@ -133,7 +133,7 @@
 //    }
 //
 //    public void createNotification(String title, String text) {
-//        NotificationManager notificationManager = (NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
+//        AppNotificationManager notificationManager = (AppNotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
 //
 //        Uri soundUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + activity.getPackageName() + "/" + R.raw.shipbell); // Alarm mp3 위치 지정(오류 있는 듯)
 //
@@ -150,7 +150,7 @@
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 //            builder.setSmallIcon(R.drawable.ic_launcher); //mipmap 사용시 Oreo 이상에서 시스템 UI 에러남
 //            builder.setLargeIcon(BitmapFactory.decodeResource(activity.getResources(), R.drawable.ic_launcher)); //mipmap 사용시 Oreo 이상에서 시스템 UI 에러남
-//            int importance = NotificationManager.IMPORTANCE_HIGH;
+//            int importance = AppNotificationManager.IMPORTANCE_HIGH;
 //
 //            NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, title, importance);
 //            channel.setDescription(text);

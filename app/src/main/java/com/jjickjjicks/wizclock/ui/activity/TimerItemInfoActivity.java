@@ -96,7 +96,7 @@ public class TimerItemInfoActivity extends AppCompatActivity implements View.OnC
 
     private void getUI(final String key) {
         checkOwn(key);
-        if (mode == TimerItem.ONLINE)
+        if (((AccessSettings) this.getApplication()).getAccessMode() == AccessSettings.ONLINE_ACCESS && mode == TimerItem.ONLINE)
             getOnlineUI(key);
         else
             getOfflineUI(key);
@@ -169,6 +169,14 @@ public class TimerItemInfoActivity extends AppCompatActivity implements View.OnC
         tvAuthorEmail.setText(timerItem.getAuthorEmail());
         tvType.setText(String.valueOf(timerItem.getType()));
         tvRecursive.setText(String.valueOf(timerData.getTimeCnt()));
+
+        ArrayList<Long> timeList = timerData.getTimeList();
+        for (long i : timeList)
+            singleTimeDataArrayList.add(new SingleTimeData(i));
+
+        rvTimerItem.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        adapter = new TimeInfoDataAdatper(singleTimeDataArrayList);
+        rvTimerItem.setAdapter(adapter);
     }
 
     @Override

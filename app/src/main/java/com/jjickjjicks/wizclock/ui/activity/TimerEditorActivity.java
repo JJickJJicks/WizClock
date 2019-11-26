@@ -193,7 +193,7 @@ public class TimerEditorActivity extends AppCompatActivity implements View.OnCli
         final SharedPreferences preferences = getSharedPreferences("TimerItem", 0);
         SharedPreferences.Editor editor = preferences.edit();
 
-        TimerItem item = new TimerItem(TimerItem.OFFLINE, title, description, user.getDisplayName(), user.getEmail(), type, new TimerData(timeCnt, timeList));
+        TimerItem item = new TimerItem(TimerItem.OFFLINE, title, description, "Offline Info", "Offline Info", type, new TimerData(timeCnt, timeList));
 
         final String key = new SimpleDateFormat("yyyyMMddHHmmss", Locale.KOREAN).format(Calendar.getInstance().getTime());
         editor.putString(key, item.toString());
