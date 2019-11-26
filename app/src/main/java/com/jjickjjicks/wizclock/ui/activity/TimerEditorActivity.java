@@ -29,12 +29,12 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.ikovac.timepickerwithseconds.MyTimePickerDialog;
 import com.ikovac.timepickerwithseconds.TimePicker;
-import com.jjickjjicks.wizclock.AccessSettings;
 import com.jjickjjicks.wizclock.R;
 import com.jjickjjicks.wizclock.data.adapter.SingleTimeDataAdapter;
 import com.jjickjjicks.wizclock.data.item.SingleTimeData;
 import com.jjickjjicks.wizclock.data.item.TimerData;
 import com.jjickjjicks.wizclock.data.item.TimerItem;
+import com.jjickjjicks.wizclock.service.AccessSettings;
 import com.travijuu.numberpicker.library.NumberPicker;
 
 import java.text.SimpleDateFormat;

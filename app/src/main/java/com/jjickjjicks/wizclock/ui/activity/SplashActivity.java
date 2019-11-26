@@ -6,8 +6,8 @@ import android.os.Handler;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.jjickjjicks.wizclock.AccessSettings;
 import com.jjickjjicks.wizclock.R;
+import com.jjickjjicks.wizclock.service.AccessSettings;
 import com.jjickjjicks.wizclock.ui.dialog.InternetDialog;
 
 

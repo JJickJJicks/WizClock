@@ -7,7 +7,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,12 +25,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.jjickjjicks.wizclock.AccessSettings;
 import com.jjickjjicks.wizclock.R;
 import com.jjickjjicks.wizclock.data.adapter.TimeInfoDataAdatper;
 import com.jjickjjicks.wizclock.data.item.SingleTimeData;
 import com.jjickjjicks.wizclock.data.item.TimerData;
 import com.jjickjjicks.wizclock.data.item.TimerItem;
+import com.jjickjjicks.wizclock.service.AccessSettings;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -84,22 +83,45 @@ public class TimerItemInfoActivity extends AppCompatActivity implements View.OnC
         getUI(key);
     }
 
-    private void checkOwn(final String key) {
+    private boolean checkOwnStatus(final String key) {
         SharedPreferences preferences = getSharedPreferences("TimerItem", 0);
         HashMap<String, Object> data = new HashMap<>(preferences.getAll());
 
-        if (((AccessSettings) this.getApplication()).getAccessMode() == AccessSettings.ONLINE_ACCESS && !data.containsKey(key))
-            btnAddTimerItem.setEnabled(true);
-        else
-            btnAddTimerItem.setEnabled(false);
+        return !data.containsKey(key);
     }
 
     private void getUI(final String key) {
-        checkOwn(key);
-        if (((AccessSettings) this.getApplication()).getAccessMode() == AccessSettings.ONLINE_ACCESS && mode == TimerItem.ONLINE)
-            getOnlineUI(key);
-        else
+        // 내가 가지고 있음
+        if (checkOwnStatus(key)) {
+            btnAddTimerItem.setEnabled(false);
+        } else {
+            btnAddTimerItem.setEnabled(true);
+        }
+
+        // 오프라인일때
+        if (((AccessSettings) this.getApplication()).getAccessMode() == AccessSettings.OFFLINE_ACCESS) {
             getOfflineUI(key);
+
+            SharedPreferences preferences = getSharedPreferences("TimerItem", 0);
+            String JsonLoad = preferences.getString(key, null);
+            TimerItem timerItem = new TimerItem(JsonLoad);
+
+            // 아이템 타입이 오프라인이면 (=내가 만든것)
+            if (timerItem.getType() == TimerItem.OFFLINE) {
+                Log.d("Check", "Owner");
+                btnEdit.setEnabled(true);
+            } else {
+                btnEdit.setEnabled(false);
+            }
+        } else {
+            // 온라인이지만 오프라인 아이템일 경우 (=내 소유)
+            if (mode == TimerItem.OFFLINE) {
+                getOfflineUI(key);
+                btnEdit.setEnabled(true);
+            } else { // (=온라인 결과에 따라 처리)
+                getOnlineUI(key);
+            }
+        }
     }
 
     // 아이템 설정이 online임과 동시에 현재 상태가 online일 때 활성화 되는 UI
@@ -182,12 +204,10 @@ public class TimerItemInfoActivity extends AppCompatActivity implements View.OnC
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.btnEdit) {
-            Toast.makeText(this, "아직 지원되지 않는 기능입니다.", Toast.LENGTH_SHORT).show();
-
-//            Intent intent = new Intent(this, TimerEditorActivity.class);
-//            intent.putExtra("mode", TimerEditorActivity.MODE_EDIT);
-//            intent.putExtra("key", key);
-//            startActivityForResult(intent, TIMER_EDIT);
+            Intent intent = new Intent(this, TimerEditorActivity.class);
+            intent.putExtra("mode", TimerEditorActivity.MODE_EDIT);
+            intent.putExtra("key", key);
+            startActivityForResult(intent, TIMER_EDIT);
 
         } else if (v.getId() == R.id.btnAddTimerItem) {
             SharedPreferences preferences = getSharedPreferences("TimerItem", 0);
@@ -231,8 +251,28 @@ public class TimerItemInfoActivity extends AppCompatActivity implements View.OnC
         super.onActivityResult(requestCode, resultCode, data);
 
         //TODO : 업데이트 시 기존 해당 아이템 정보를 가지고 있던 사용자에게 변경되었음을 알림
-//        if (requestCode == TIMER_EDIT && resultCode == RESULT_OK) {
-//            getUI(key);
-//        }
+        if (requestCode == TIMER_EDIT && resultCode == RESULT_OK) {
+            getUI(key);
+        }
     }
+
+//    public void sendToTopic() throws FirebaseMessagingException {
+//        // [START send_to_topic]
+//        // The topic name can be optionally prefixed with "/topics/".
+//        String topic = "highScores";
+//
+//        // See documentation on defining a message payload.
+//        RemoteMessage message = RemoteMessage.Builder
+//                .putData("score", "850")
+//                .putData("time", "2:45")
+//                .setTopic(topic)
+//                .build();
+//
+//        // Send a message to the devices subscribed to the provided topic.
+//        FirebaseMessaging.getInstance().send(message);
+//        String response = FirebaseMessaging.getInstance().send(message);
+//        // Response is a message ID string.
+//        System.out.println("Successfully sent message: " + response);
+//        // [END send_to_topic]
+//    }
 }
