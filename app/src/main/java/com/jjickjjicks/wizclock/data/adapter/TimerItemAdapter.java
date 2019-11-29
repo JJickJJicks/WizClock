@@ -1,6 +1,7 @@
 package com.jjickjjicks.wizclock.data.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,14 +13,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.jjickjjicks.wizclock.R;
 import com.jjickjjicks.wizclock.data.item.TimerItem;
+import com.jjickjjicks.wizclock.ui.activity.TimerActionActivity;
 
 import java.util.ArrayList;
 
 public class TimerItemAdapter extends RecyclerView.Adapter<TimerItemAdapter.ViewHolder> {
+    private Context context;
     private ArrayList<TimerItem> list = null;
 
-    public TimerItemAdapter(ArrayList<TimerItem> list) {
+    public TimerItemAdapter(ArrayList<TimerItem> list, Context context) {
         this.list = list;
+        this.context = context;
     }
 
     @NonNull
@@ -58,6 +62,19 @@ public class TimerItemAdapter extends RecyclerView.Adapter<TimerItemAdapter.View
             imageView = itemView.findViewById(R.id.typeIconView);
             itemName = itemView.findViewById(R.id.tvTimerTitle);
             itemAuthor = itemView.findViewById(R.id.tvTimerAuthor);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        Intent intent = new Intent(context, TimerActionActivity.class);
+                        intent.putExtra("timerData", list.get(position).getTimerData().toString());
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(intent);
+                    }
+                }
+            });
         }
     }
 }

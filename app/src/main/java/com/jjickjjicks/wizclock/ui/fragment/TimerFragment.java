@@ -128,7 +128,7 @@ public class TimerFragment extends Fragment implements View.OnClickListener {
             String JsonLoad = preferences.getString(key, null);
             timerItmeList.add(new TimerItem(JsonLoad));
         }
-        adapter = new TimerItemAdapter(timerItmeList);
+        adapter = new TimerItemAdapter(timerItmeList, getContext());
         recyclerView.setAdapter(adapter);
     }
 

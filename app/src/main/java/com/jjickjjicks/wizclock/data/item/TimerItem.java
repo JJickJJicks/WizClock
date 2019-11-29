@@ -6,17 +6,19 @@ import com.jjickjjicks.wizclock.R;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class TimerItem {
     public final static int ONLINE = 0, OFFLINE = 1;
     final private static int TYPE_STUDY = 0, TYPE_HEALTH = 1, TYPE_COOK = 2, TYPE_ETC = 3;
 
-    private String title, describe, authorName, authorEmail;
-    private int onlineCheck;
+    private String title, describe, authorName, authorEmail, regDate;
+    private int onlineCheck, type;
     private TimerData timerData;
-    private int type;
 
     public TimerItem() {
     }
@@ -30,6 +32,7 @@ public class TimerItem {
             this.authorName = jsonObject.getString("authorName");
             this.authorEmail = jsonObject.getString("authorEmail");
             this.type = jsonObject.getInt("type");
+            this.regDate = jsonObject.getString("regDate");
             this.timerData = new TimerData(jsonObject.getString("timerData"));
         } catch (JSONException e) {
             e.printStackTrace();
@@ -43,6 +46,7 @@ public class TimerItem {
         this.authorName = map.get("authorName").toString();
         this.authorEmail = map.get("authorEmail").toString();
         this.type = Integer.valueOf(map.get("type").toString());
+        this.regDate = map.get("regDate").toString();
         this.timerData = new TimerData((String) map.get("timerData"));
     }
 
@@ -53,17 +57,16 @@ public class TimerItem {
         this.authorName = authorName;
         this.authorEmail = authorEmail;
         this.type = type;
+        this.regDate = new SimpleDateFormat("yyyyMMddHHmmss", Locale.KOREAN).format(Calendar.getInstance().getTime());
         this.timerData = timerData;
     }
 
-    public TimerItem(int onlineCheck, String title, String describe, String authorName, String authorEmail, int type, String timerData) {
-        this.onlineCheck = onlineCheck;
-        this.title = title;
-        this.describe = describe;
-        this.authorName = authorName;
-        this.authorEmail = authorEmail;
-        this.type = type;
-        this.timerData = new TimerData(timerData);
+    public String getRegDate() {
+        return regDate;
+    }
+
+    public void setRegDate() {
+        this.regDate = new SimpleDateFormat("yyyyMMddHHmmss", Locale.KOREAN).format(Calendar.getInstance().getTime());
     }
 
     public int getOnlineCheck() {
@@ -116,6 +119,7 @@ public class TimerItem {
         result.put("authorName", authorName);
         result.put("authorEmail", authorEmail);
         result.put("type", type);
+        result.put("regDate", regDate);
         result.put("timerData", timerData.toString());
         return result;
     }
