@@ -62,7 +62,7 @@ public class TimerData {
 
     public ArrayList<Long> getRecursiveTimeList() { // 반복으로 생성된 timeList(최종 실행용)
         ArrayList<Long> recursiveTimeList = new ArrayList<>();
-        for (int i = 0; i < timeCnt; i++)
+        for (int i = 0; i <= timeCnt; i++)
             recursiveTimeList.addAll(timeList);
 
         return recursiveTimeList;

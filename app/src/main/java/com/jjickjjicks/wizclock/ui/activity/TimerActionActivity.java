@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.crashlytics.android.Crashlytics;
@@ -49,6 +50,7 @@ public class TimerActionActivity extends AppCompatActivity implements View.OnCli
             return formatText(Double.valueOf(time));
         }
     };
+
     private CircularProgressIndicator circularProgress;
     private RecyclerView timeList;
     private Button btnStartPause, btnReset;
@@ -69,6 +71,7 @@ public class TimerActionActivity extends AppCompatActivity implements View.OnCli
 
         timeArrayList = new ArrayList<>();
         ArrayList<Long> tempTimeList = new TimerData(JsonLoad).getRecursiveTimeList();
+
         for (long i : tempTimeList)
             timeArrayList.add(new SingleTimeData(i));
 
@@ -79,6 +82,8 @@ public class TimerActionActivity extends AppCompatActivity implements View.OnCli
 
         btnStartPause.setOnClickListener(this);
         btnReset.setOnClickListener(this);
+
+        timeList.setLayoutManager(new LinearLayoutManager(this));
         updateUI();
     }
 
