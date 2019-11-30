@@ -30,7 +30,7 @@
                     style="@style/viewParent.headerText.NoMode"
                     android:layout_alignParentLeft="true"
                     android:layout_centerVertical="true"
-                    android:text="Here’s\nyour first\nstep with \nus! "
+                    android:text="WizClock에\n가입해볼까요! "
                     android:textColor="@color/whiteTextColor" />
 
                 <ImageView
@@ -121,7 +121,7 @@
                         style="@style/parent"
                         android:layout_marginTop="@dimen/loginViewsMargin"
                         android:onClick="onLoginClick"
-                        android:text="Already have an account?"
+                        android:text="이미 회원이세요?"
                         android:textAlignment="center"
                         android:textColor="@color/themeColor"
                         android:textSize="17sp"
@@ -147,7 +147,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="6"
-                    android:text="Use other Methods"
+                    android:text="SNS 로그인"
                     android:textAlignment="center"
                     android:textColor="@color/whiteTextColor"
                     android:textSize="12sp" />

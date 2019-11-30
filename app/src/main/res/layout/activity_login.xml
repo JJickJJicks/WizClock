@@ -32,7 +32,7 @@
                     style="@style/viewParent.headerText.NoMode"
                     android:layout_alignParentLeft="true"
                     android:layout_centerVertical="true"
-                    android:text="Already \nhave an \nAccount?" />
+                    android:text="WizClock의\n회원이신가요?" />
 
                 <ImageView
                     android:layout_width="wrap_content"
@@ -91,7 +91,7 @@
                 style="@style/parent"
                 android:layout_marginTop="@dimen/loginViewsMargin"
                 android:onClick="onRegisterClick"
-                android:text="New user? Register Now"
+                android:text="회원이 아니시라면 가입해보세요!"
                 android:textAlignment="center"
                 android:textColor="@color/themeColor"
                 android:textSize="17sp"
@@ -115,7 +115,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="6"
-                    android:text="Use other Methods"
+                    android:text="SNS 로그인"
                     android:textAlignment="center"
                     android:textSize="12sp" />
 
