@@ -91,23 +91,55 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         updateUI(currentUser);
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
 
-        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
-        if (requestCode == RC_SIGN_IN) {
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            try {
-                // Google Sign In was successful, authenticate with Firebase
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-                firebaseAuthWithGoogle(account);
-            } catch (ApiException e) {
-                // Google Sign In failed, update UI appropriately
-                Log.w(TAG, "Google sign in failed", e);
-                updateUI(null);
-            }
+    private void updateUI(FirebaseUser user) {
+        if (user != null) {
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
+            finish();
         }
+    }
+
+    @Override
+    public void onClick(View view) {
+        if (view.getId() == R.id.cirLoginButton) {
+            signInWithEmail();
+        } else if (view.getId() == R.id.btnGoogleLogin) {
+            signInWithGoogle();
+        } else if (view.getId() == R.id.btnFacebookLogin) {
+            Toast.makeText(this, "미지원 기능입니다.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void signInWithEmail() {
+        String email = editTextEmail.getText().toString().trim();
+        String password = editTextPassword.getText().toString().trim();
+
+        if (!email.equals("") && !password.equals("")) {
+            mAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                Log.d(TAG, "signInWithEmail:success");
+                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                startActivity(intent);
+                                finish();
+                            } else {
+                                // If sign in fails, display a message to the user.
+                                Log.w(TAG, "signInWithEmail:failure", task.getException());
+                                Toast.makeText(getApplicationContext(), "로그인 실패", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    });
+        } else {
+            Toast.makeText(getApplicationContext(), "로그인 실패", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void signInWithGoogle() {
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
@@ -131,9 +163,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                                     if (!dataSnapshot.exists()) {
                                         Member member;
                                         if (!(user.getPhoneNumber() == null))
-                                            member = new Member(user.getEmail(), user.getDisplayName(), user.getPhoneNumber());
+                                            member = new Member(user.getEmail(), user.getDisplayName(), user.getPhoneNumber(), user.getPhotoUrl().toString());
                                         else
-                                            member = new Member(user.getEmail(), user.getDisplayName());
+                                            member = new Member(user.getEmail(), user.getDisplayName(), user.getPhotoUrl().toString());
 
                                         DatabaseReference memberDatabaseReference = FirebaseDatabase.getInstance().getReference("users").child(userKey);
                                         memberDatabaseReference.setValue(member.toMap());
@@ -157,53 +189,23 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 });
     }
 
-    private void signIn() {
-        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
-
-    private void updateUI(FirebaseUser user) {
-        if (user != null) {
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(intent);
-            finish();
-        }
-    }
-
     @Override
-    public void onClick(View view) {
-        if (view.getId() == R.id.cirLoginButton) {
-            login();
-        } else if (view.getId() == R.id.btnGoogleLogin) {
-            signIn();
-        } else if (view.getId() == R.id.btnFacebookLogin) {
-            Toast.makeText(this, "미지원 기능입니다.", Toast.LENGTH_SHORT).show();
-        }
-    }
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d("requestCode", String.valueOf(requestCode));
 
-    public void login() {
-        String email = editTextEmail.getText().toString().trim();
-        String password = editTextPassword.getText().toString().trim();
-
-        if (!email.equals("") && !password.equals("")) {
-            mAuth.signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (task.isSuccessful()) {
-                                Log.d(TAG, "signInWithEmail:success");
-                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                                startActivity(intent);
-                                finish();
-                            } else {
-                                // If sign in fails, display a message to the user.
-                                Log.w(TAG, "signInWithEmail:failure", task.getException());
-                                Toast.makeText(getApplicationContext(), "로그인 실패", Toast.LENGTH_LONG).show();
-                            }
-                        }
-                    });
-        } else {
-            Toast.makeText(getApplicationContext(), "로그인 실패", Toast.LENGTH_LONG).show();
+        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
+        if (requestCode == RC_SIGN_IN) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            try {
+                // Google Sign In was successful, authenticate with Firebase
+                GoogleSignInAccount account = task.getResult(ApiException.class);
+                firebaseAuthWithGoogle(account);
+            } catch (ApiException e) {
+                // Google Sign In failed, update UI appropriately
+                Log.w(TAG, "Google sign in failed", e);
+                updateUI(null);
+            }
         }
     }
 }

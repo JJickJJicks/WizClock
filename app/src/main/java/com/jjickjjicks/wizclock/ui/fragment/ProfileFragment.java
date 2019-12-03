@@ -1,7 +1,9 @@
 package com.jjickjjicks.wizclock.ui.fragment;
 
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,31 +52,35 @@ public class ProfileFragment extends Fragment {
 
         StartProgress();
         final String userKey = user.getEmail().replace(".", "_");
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("users");
-        databaseReference.addValueEventListener(new ValueEventListener() {
+        final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("users");
+        databaseReference.child(userKey).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    if (snapshot.getKey().equals(userKey)) {
-                        Member member = snapshot.getValue(Member.class);
+                Member member = dataSnapshot.getValue(Member.class);
 
-                        textViewHeaderUserName.setText(user.getDisplayName());
-                        textViewHeaderUserEmail.setText(user.getEmail());
+                textViewHeaderUserName.setText(user.getDisplayName());
+                textViewHeaderUserEmail.setText(user.getEmail());
 
-                        textViewHeaderUserLevel.setText("Lv." + member.getLevel());
-                        textViewHeaderUserExp.setText(member.getExperience() + "/10");
-                        progressBarHeaderUserExp.setProgress(member.getExperience() * 10);
+                textViewHeaderUserLevel.setText("Lv." + member.getLevel());
+                textViewHeaderUserExp.setText(member.getExperience() + "/10");
+                progressBarHeaderUserExp.setProgress(member.getExperience() * 10);
 
-                        if (user.getPhotoUrl().equals(null))
-                            Glide.with(getContext()).load(R.drawable.blank_profile_image).apply(RequestOptions.circleCropTransform()).into(imageViewHeaderProfile);
-                        else
-                            Glide.with(getContext()).load(user.getPhotoUrl()).apply(RequestOptions.circleCropTransform()).into(imageViewHeaderProfile);
+                Uri photo = user.getPhotoUrl();
 
-                        textViewUserName.setText(member.getName());
-                        textViewUserPhoneNumber.setText(!(member.getPhoneNumber() == null) && (!(member.getPhoneNumber().equals(""))) ? user.getPhoneNumber() : "등록되지 않았습니다.");
-                        textViewUserEmail.setText(member.getEmail());
+                if (photo == null)
+                    Glide.with(getContext()).load(R.drawable.blank_profile_image).apply(RequestOptions.circleCropTransform()).into(imageViewHeaderProfile);
+                else {
+                    if (!photo.toString().equals(member.getPhotoUrl())) {
+                        member.setPhotoUrl(photo.toString());
+                        databaseReference.child(userKey).setValue(member.toMap());
                     }
+                    Glide.with(getContext()).load(photo).apply(RequestOptions.circleCropTransform()).into(imageViewHeaderProfile);
                 }
+
+                textViewUserName.setText(member.getName());
+                Log.d("test", member.getPhoneNumber());
+                textViewUserPhoneNumber.setText(!(member.getPhoneNumber() == null) && (!(member.getPhoneNumber().equals(""))) ? String.valueOf(user.getPhoneNumber()) : "등록되지 않았습니다.");
+                textViewUserEmail.setText(member.getEmail());
             }
 
             @Override

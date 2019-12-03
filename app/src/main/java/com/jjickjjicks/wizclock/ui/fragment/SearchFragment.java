@@ -101,12 +101,12 @@ public class SearchFragment extends Fragment {
     }
 
     private void updateUI() {
-        timerItemList.clear();
-        keyList.clear();
         databaseReference = database.getReference("timer");
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                timerItemList.clear();
+                keyList.clear();
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         HashMap<String, Object> map = new HashMap<>((Map) snapshot.getValue());
@@ -127,13 +127,13 @@ public class SearchFragment extends Fragment {
     }
 
     private void updateUI(String search) {
-        timerItemList.clear();
-        keyList.clear();
         databaseReference = database.getReference("timer");
         Query timerSearch = databaseReference.orderByChild("title").startAt(search).endAt(search + "\uf8ff");
         ValueEventListener searchListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                timerItemList.clear();
+                keyList.clear();
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         HashMap<String, Object> map = new HashMap<>((Map) snapshot.getValue());

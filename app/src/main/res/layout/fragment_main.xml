@@ -126,16 +126,8 @@
                     style="@style/viewParent.headerText"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentTop="true"
-                    android:text="WizTimer Top 3" />
+                    android:text="Best Timer Top 5" />
 
-                <TextView
-                    style="@style/viewParent"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:text="See All"
-                    android:textColor="@color/primaryTextColor"
-                    android:textSize="@dimen/headerMoreTextSize"
-                    android:textStyle="bold" />
             </RelativeLayout>
             <!--remove the below layout with recycler view, use card poplar courses as model for design-->
             <HorizontalScrollView
@@ -148,11 +140,11 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-                    <include layout="@layout/card_popular_timers" />
+                    <include layout="@layout/card_best_timers" />
 
-                    <include layout="@layout/card_popular_timers" />
+                    <include layout="@layout/card_best_timers" />
 
-                    <include layout="@layout/card_popular_timers" />
+                    <include layout="@layout/card_best_timers" />
                 </LinearLayout>
             </HorizontalScrollView>
 
@@ -165,16 +157,8 @@
                     style="@style/viewParent.headerText"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentTop="true"
-                    android:text="인기 사용자" />
+                    android:text="Best User Top 5" />
 
-                <TextView
-                    style="@style/viewParent"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:text="See All"
-                    android:textColor="@color/primaryTextColor"
-                    android:textSize="@dimen/headerMoreTextSize"
-                    android:textStyle="bold" />
             </RelativeLayout>
             <!--remove the below layout with recycler view, use card poplar courses as model for design-->
             <HorizontalScrollView
@@ -188,11 +172,11 @@
                     android:layout_marginTop="20dp"
                     android:orientation="horizontal">
 
-                    <include layout="@layout/card_popular_users" />
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/bestUserList"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
 
-                    <include layout="@layout/card_popular_users" />
-
-                    <include layout="@layout/card_popular_users" />
                 </LinearLayout>
             </HorizontalScrollView>
 

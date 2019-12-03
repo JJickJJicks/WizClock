@@ -9,22 +9,25 @@ public class Member {
     private String email;
     private String name;
     private String phoneNumber;
+    private String photoUrl;
     private int experience;
 
     public Member() {
     }
 
-    public Member(String email, String name) {
+    public Member(String email, String name, String photoUrl) {
         this.email = email;
         this.name = name;
         this.phoneNumber = "";
+        this.photoUrl = photoUrl;
         this.experience = 0;
     }
 
-    public Member(String email, String name, String phoneNumber) {
+    public Member(String email, String name, String phoneNumber, String photoUrl) {
         this.email = email;
         this.name = name;
         this.phoneNumber = phoneNumber;
+        this.photoUrl = photoUrl;
         this.experience = 0;
     }
 
@@ -56,6 +59,17 @@ public class Member {
         return experience % 10;
     }
 
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
+    }
+
+    public void increaseExpeirence() {
+        this.experience++;
+    }
 
     @Exclude
     public Map<String, Object> toMap() {
@@ -63,6 +77,7 @@ public class Member {
         result.put("email", email);
         result.put("name", name);
         result.put("phoneNumber", phoneNumber);
+        result.put("photoUrl", photoUrl);
         result.put("experience", experience);
 
         return result;

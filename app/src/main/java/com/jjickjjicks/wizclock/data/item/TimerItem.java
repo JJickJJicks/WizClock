@@ -17,7 +17,7 @@ public class TimerItem {
     final private static int TYPE_STUDY = 0, TYPE_HEALTH = 1, TYPE_COOK = 2, TYPE_ETC = 3;
 
     private String title, describe, authorName, authorEmail, regDate;
-    private int onlineCheck, type;
+    private int onlineCheck, type, cnt = 0;
     private TimerData timerData;
 
     public TimerItem() {
@@ -33,6 +33,7 @@ public class TimerItem {
             this.authorEmail = jsonObject.getString("authorEmail");
             this.type = jsonObject.getInt("type");
             this.regDate = jsonObject.getString("regDate");
+            this.cnt = jsonObject.getInt("cnt");
             this.timerData = new TimerData(jsonObject.getString("timerData"));
         } catch (JSONException e) {
             e.printStackTrace();
@@ -47,6 +48,7 @@ public class TimerItem {
         this.authorEmail = map.get("authorEmail").toString();
         this.type = Integer.valueOf(map.get("type").toString());
         this.regDate = map.get("regDate").toString();
+        this.cnt = Integer.valueOf(map.get("cnt").toString());
         this.timerData = new TimerData((String) map.get("timerData"));
     }
 
@@ -120,6 +122,7 @@ public class TimerItem {
         result.put("authorEmail", authorEmail);
         result.put("type", type);
         result.put("regDate", regDate);
+        result.put("cnt", cnt);
         result.put("timerData", timerData.toString());
         return result;
     }
@@ -129,5 +132,9 @@ public class TimerItem {
         HashMap<String, Object> map = new HashMap<>(toMap());
         JSONObject jsonObject = new JSONObject(map);
         return jsonObject.toString();
+    }
+
+    public void increaseCnt() {
+        this.cnt++;
     }
 }

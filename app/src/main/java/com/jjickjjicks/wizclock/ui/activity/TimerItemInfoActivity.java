@@ -27,6 +27,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.jjickjjicks.wizclock.R;
 import com.jjickjjicks.wizclock.data.adapter.TimeInfoDataAdatper;
+import com.jjickjjicks.wizclock.data.item.Member;
 import com.jjickjjicks.wizclock.data.item.SingleTimeData;
 import com.jjickjjicks.wizclock.data.item.TimerData;
 import com.jjickjjicks.wizclock.data.item.TimerItem;
@@ -83,12 +84,7 @@ public class TimerItemInfoActivity extends AppCompatActivity implements View.OnC
         getUI(key);
     }
 
-    private boolean checkOwnStatus(final String key) {
-        SharedPreferences preferences = getSharedPreferences("TimerItem", 0);
-        HashMap<String, Object> data = new HashMap<>(preferences.getAll());
-
-        return !data.containsKey(key);
-    }
+    private boolean result = true;
 
     private void getUI(final String key) {
         // 내가 가지고 있음
@@ -124,13 +120,50 @@ public class TimerItemInfoActivity extends AppCompatActivity implements View.OnC
         }
     }
 
+    private boolean checkOwnStatus(final String key) {
+        SharedPreferences preferences = getSharedPreferences("TimerItem", 0);
+        HashMap<String, Object> data = new HashMap<>(preferences.getAll());
+
+        return data.containsKey(key);
+    }
+
+    // 아이템 설정이 offline이거나 현재 설정이 offline일때 출력되는 ui
+    private void getOfflineUI(final String key) {
+        SharedPreferences preferences = getSharedPreferences("TimerItem", 0);
+
+        String JsonLoad = preferences.getString(key, null);
+        TimerItem timerItem = new TimerItem(JsonLoad);
+
+        if (timerItem.getType() == TimerItem.OFFLINE) {
+            Log.d("Check", "Owner");
+            btnEdit.setEnabled(true);
+        }
+
+        TimerData timerData = timerItem.getTimerData();
+
+        tvTimerItemName.setText(timerItem.getTitle());
+        tvTimerItemDescription.setText(timerItem.getDescribe());
+        tvAuthorName.setText(timerItem.getAuthorName());
+        tvAuthorEmail.setText(timerItem.getAuthorEmail());
+        tvType.setText(String.valueOf(timerItem.getType()));
+        tvRecursive.setText(String.valueOf(timerData.getTimeCnt()));
+
+        ArrayList<Long> timeList = timerData.getTimeList();
+        for (long i : timeList)
+            singleTimeDataArrayList.add(new SingleTimeData(i));
+
+        rvTimerItem.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        adapter = new TimeInfoDataAdatper(singleTimeDataArrayList);
+        rvTimerItem.setAdapter(adapter);
+    }
+
     // 아이템 설정이 online임과 동시에 현재 상태가 online일 때 활성화 되는 UI
     private void getOnlineUI(final String key) {
         user = FirebaseAuth.getInstance().getCurrentUser();
         Log.d("Check", "Method Load Complete");
 
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("timer");
-        databaseReference.addValueEventListener(new ValueEventListener() {
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
@@ -171,34 +204,39 @@ public class TimerItemInfoActivity extends AppCompatActivity implements View.OnC
         });
     }
 
-    // 아이템 설정이 offline이거나 현재 설정이 offline일때 출력되는 ui
-    private void getOfflineUI(final String key) {
-        SharedPreferences preferences = getSharedPreferences("TimerItem", 0);
+    public boolean cntProgress() {
+        if (((AccessSettings) this.getApplication()).getAccessMode() == AccessSettings.ONLINE_ACCESS && mode == TimerItem.ONLINE) {
+            timerItem.increaseCnt();
+            FirebaseDatabase.getInstance().getReference("timer").child(key).setValue(timerItem.toMap(), new DatabaseReference.CompletionListener() {
+                @Override
+                public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                    if (databaseError == null) {
+                        final String userKey = user.getEmail().replace(".", "_");
+                        final DatabaseReference reference = FirebaseDatabase.getInstance().getReference("users");
+                        reference.child(userKey).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                Member member = dataSnapshot.getValue(Member.class);
+                                member.increaseExpeirence();
+                                FirebaseDatabase.getInstance().getReference("users").child(userKey).setValue(member.toMap(), new DatabaseReference.CompletionListener() {
+                                    @Override
+                                    public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                                        result = databaseError == null;
+                                    }
+                                });
+                            }
 
-        String JsonLoad = preferences.getString(key, null);
-        TimerItem timerItem = new TimerItem(JsonLoad);
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
 
-        if (timerItem.getType() == TimerItem.OFFLINE) {
-            Log.d("Check", "Owner");
-            btnEdit.setEnabled(true);
+                            }
+                        });
+                    } else
+                        result = false;
+                }
+            });
         }
-
-        TimerData timerData = timerItem.getTimerData();
-
-        tvTimerItemName.setText(timerItem.getTitle());
-        tvTimerItemDescription.setText(timerItem.getDescribe());
-        tvAuthorName.setText(timerItem.getAuthorName());
-        tvAuthorEmail.setText(timerItem.getAuthorEmail());
-        tvType.setText(String.valueOf(timerItem.getType()));
-        tvRecursive.setText(String.valueOf(timerData.getTimeCnt()));
-
-        ArrayList<Long> timeList = timerData.getTimeList();
-        for (long i : timeList)
-            singleTimeDataArrayList.add(new SingleTimeData(i));
-
-        rvTimerItem.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-        adapter = new TimeInfoDataAdatper(singleTimeDataArrayList);
-        rvTimerItem.setAdapter(adapter);
+        return result;
     }
 
     @Override
@@ -210,34 +248,40 @@ public class TimerItemInfoActivity extends AppCompatActivity implements View.OnC
             startActivityForResult(intent, TIMER_EDIT);
 
         } else if (v.getId() == R.id.btnAddTimerItem) {
-            SharedPreferences preferences = getSharedPreferences("TimerItem", 0);
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putString(key, timerItem.toString());
-            if (editor.commit()) {
-                FirebaseMessaging.getInstance().subscribeToTopic(key)
-                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()) {
-                                    new SweetAlertDialog(TimerItemInfoActivity.this, SweetAlertDialog.SUCCESS_TYPE)
-                                            .setTitleText("추가되었습니다!")
-                                            .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
-                                                @Override
-                                                public void onClick(SweetAlertDialog sDialog) {
-                                                    Intent intent = new Intent();
-                                                    setResult(RESULT_OK, intent);
-                                                    sDialog.dismiss();
-                                                    finish();
-                                                }
-                                            })
-                                            .show();
-                                } else {
-                                    new SweetAlertDialog(TimerItemInfoActivity.this, SweetAlertDialog.ERROR_TYPE)
-                                            .setTitleText("문제가 발생했어요!")
-                                            .show();
+            if (cntProgress()) {
+                SharedPreferences preferences = getSharedPreferences("TimerItem", 0);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString(key, timerItem.toString());
+                if (editor.commit()) {
+                    FirebaseMessaging.getInstance().subscribeToTopic(key)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        new SweetAlertDialog(TimerItemInfoActivity.this, SweetAlertDialog.SUCCESS_TYPE)
+                                                .setTitleText("추가되었습니다!")
+                                                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                                    @Override
+                                                    public void onClick(SweetAlertDialog sDialog) {
+                                                        Intent intent = new Intent();
+                                                        setResult(RESULT_OK, intent);
+                                                        sDialog.dismiss();
+                                                        finish();
+                                                    }
+                                                })
+                                                .show();
+                                    } else {
+                                        new SweetAlertDialog(TimerItemInfoActivity.this, SweetAlertDialog.ERROR_TYPE)
+                                                .setTitleText("문제가 발생했어요!")
+                                                .show();
+                                    }
                                 }
-                            }
-                        });
+                            });
+                } else {
+                    new SweetAlertDialog(TimerItemInfoActivity.this, SweetAlertDialog.ERROR_TYPE)
+                            .setTitleText("문제가 발생했어요!")
+                            .show();
+                }
             } else {
                 new SweetAlertDialog(TimerItemInfoActivity.this, SweetAlertDialog.ERROR_TYPE)
                         .setTitleText("문제가 발생했어요!")

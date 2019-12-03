@@ -93,8 +93,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+//        NavigationView navigationView = findViewById(R.id.nav_view);
+//        navigationView.setNavigationItemSelectedListener(this);
+        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 
         bottomNavigationView = findViewById(R.id.navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -126,6 +127,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 bottomNavigationView.setContextClickable(false);
             }
             bottomNavigationView.setOnClickListener(null);
+            bottomNavigationView.setOnNavigationItemSelectedListener(null);
         }
     }
 

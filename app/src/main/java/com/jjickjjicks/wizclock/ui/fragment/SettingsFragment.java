@@ -2,6 +2,7 @@ package com.jjickjjicks.wizclock.ui.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,12 +22,14 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserInfo;
 import com.jjickjjicks.wizclock.R;
 import com.jjickjjicks.wizclock.ui.activity.LoginActivity;
 
+import java.util.List;
+
 
 public class SettingsFragment extends Fragment {
-    private FirebaseAuth mAuth;
     private FirebaseUser user;
     private GoogleSignInClient mGoogleSignInClient;
     private TextView usernameTextView, useremailTextView, btnLogout;
@@ -42,8 +45,7 @@ public class SettingsFragment extends Fragment {
         btnLogout = root.findViewById(R.id.btnLogout);
 
         // Firebase 로드
-        mAuth = FirebaseAuth.getInstance();
-        user = mAuth.getCurrentUser();
+        user = FirebaseAuth.getInstance().getCurrentUser();
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -55,7 +57,7 @@ public class SettingsFragment extends Fragment {
 
         usernameTextView.setText(user.getDisplayName());
         useremailTextView.setText(user.getEmail());
-        if (user.getPhotoUrl().equals(null))
+        if (user.getPhotoUrl() == null)
             Glide.with(this).load(R.drawable.blank_profile_image).apply(RequestOptions.circleCropTransform()).into(profileCircleImageView);
         else
             Glide.with(this).load(user.getPhotoUrl()).apply(RequestOptions.circleCropTransform()).into(profileCircleImageView);
@@ -71,24 +73,33 @@ public class SettingsFragment extends Fragment {
     }
 
     private void revokeAccess() {
-        // Firebase sign out
-        mAuth.signOut();
+        List<? extends UserInfo> data = user.getProviderData();
+        String providerID = data.get(data.size() - 1).getProviderId();
+        Log.d("ProviderID", providerID);
 
-        // Google revoke access
-        mGoogleSignInClient.revokeAccess().addOnCompleteListener(getActivity(),
-                new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if(task.isSuccessful()){
-                            // 초기 로그인 화면으로 돌아감
-                            Intent i = new Intent(getContext(), LoginActivity.class);
-                            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(i);
+        // Firebase sign out
+        FirebaseAuth.getInstance().signOut();
+
+        if (providerID.equals("google.com")) {// Google revoke access
+            mGoogleSignInClient.revokeAccess().addOnCompleteListener(getActivity(),
+                    new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                // 초기 로그인 화면으로 돌아감
+                                Intent i = new Intent(getContext(), LoginActivity.class);
+                                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(i);
+                            } else {
+                                Toast.makeText(getContext(), "로그아웃에 실패했습니다!", Toast.LENGTH_SHORT).show();
+                            }
                         }
-                        else{
-                            Toast.makeText(getContext(), "로그아웃에 실패했습니다!", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+                    });
+        } else {
+            Intent i = new Intent(getContext(), LoginActivity.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+        }
+
     }
 }
