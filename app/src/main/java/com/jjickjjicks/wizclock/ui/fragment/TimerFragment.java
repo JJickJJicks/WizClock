@@ -137,6 +137,7 @@ public class TimerFragment extends Fragment implements View.OnClickListener {
     public void onClick(View view) {
         if (view.getId() == R.id.btnTimerAdd) {
             Intent intent = new Intent(getContext(), TimerEditorActivity.class);
+            intent.putExtra("mode", TimerEditorActivity.MODE_EDIT);
             startActivityForResult(intent, TIMER_CREATE);
         }
     }

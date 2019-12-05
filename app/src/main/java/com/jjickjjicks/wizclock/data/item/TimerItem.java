@@ -20,6 +20,38 @@ public class TimerItem {
     private int onlineCheck, type, cnt = 0;
     private TimerData timerData;
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setDescribe(String describe) {
+        this.describe = describe;
+    }
+
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
+    }
+
+    public void setAuthorEmail(String authorEmail) {
+        this.authorEmail = authorEmail;
+    }
+
+    public void setRegDate(String regDate) {
+        this.regDate = regDate;
+    }
+
+    public void setOnlineCheck(int onlineCheck) {
+        this.onlineCheck = onlineCheck;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public void setTimerData(TimerData timerData) {
+        this.timerData = timerData;
+    }
+
     public TimerItem() {
     }
 

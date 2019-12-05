@@ -245,6 +245,7 @@ public class TimerItemInfoActivity extends AppCompatActivity implements View.OnC
             Intent intent = new Intent(this, TimerEditorActivity.class);
             intent.putExtra("mode", TimerEditorActivity.MODE_EDIT);
             intent.putExtra("key", key);
+            intent.putExtra("item", timerItem.toString());
             startActivityForResult(intent, TIMER_EDIT);
 
         } else if (v.getId() == R.id.btnAddTimerItem) {

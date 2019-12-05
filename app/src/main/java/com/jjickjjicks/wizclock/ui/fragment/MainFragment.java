@@ -22,19 +22,26 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.jjickjjicks.wizclock.R;
+import com.jjickjjicks.wizclock.data.adapter.BestTimerAdapter;
 import com.jjickjjicks.wizclock.data.adapter.BestUserAdapter;
 import com.jjickjjicks.wizclock.data.item.Member;
+import com.jjickjjicks.wizclock.data.item.TimerItem;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainFragment extends Fragment {
     private TextView tvUserName, tvUserLevel, tvUserExp;
     private ProgressBar pbUserExp;
     private FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-    private ArrayList<Member> memberList;
-    private RecyclerView recyclerView;
-    private BestUserAdapter adapter;
+    private ArrayList<Member> memberList = new ArrayList<>();
+    private ArrayList<TimerItem> timerList = new ArrayList<>();
+    private ArrayList<String> keyList = new ArrayList<>();
+    private RecyclerView bestUserList, bestTimerList;
+    private BestUserAdapter userAdapter;
+    private BestTimerAdapter timerAdapter;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_main, container, false);
@@ -45,8 +52,10 @@ public class MainFragment extends Fragment {
         tvUserExp = root.findViewById(R.id.tvUserExp);
         pbUserExp = root.findViewById(R.id.pbUserExp);
 
-        recyclerView = root.findViewById(R.id.bestUserList);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        bestUserList = root.findViewById(R.id.bestUserList);
+        bestTimerList = root.findViewById(R.id.bestTimerList);
+        bestUserList.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        bestTimerList.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
 
         tvUserName.setText("반갑습니다! " + user.getDisplayName());
 
@@ -71,19 +80,56 @@ public class MainFragment extends Fragment {
             }
         });
 
+        getTimerRank();
         getMemberRank();
-
 
         return root;
     }
 
+    private void getTimerRank() {
+        timerList.clear();
+        keyList.clear();
+
+        Log.d("test", "start");
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("timer");
+        Query userSearch = databaseReference.orderByChild("cnt").limitToLast(5);
+        ValueEventListener searchListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    HashMap<String, Object> map = new HashMap<>((Map) snapshot.getValue());
+                    TimerItem timerItem = new TimerItem(map);
+                    Log.d("test", timerItem.getTitle());
+                    timerList.add(timerItem);
+                    keyList.add(snapshot.getKey());
+                }
+                ArrayList<TimerItem> timerReverseList = new ArrayList<>();
+                for (int i = timerList.size() - 1; i >= 0; i--)
+                    timerReverseList.add(timerList.get(i));
+
+                ArrayList<String> keyReverseList = new ArrayList<>();
+                for (int i = keyList.size() - 1; i >= 0; i--)
+                    keyReverseList.add(keyList.get(i));
+
+                timerAdapter = new BestTimerAdapter(timerReverseList, keyReverseList, getContext());
+                bestTimerList.setAdapter(timerAdapter);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
+        userSearch.addListenerForSingleValueEvent(searchListener);
+        Log.d("test", "end");
+    }
+
     private void getMemberRank() {
-        memberList = new ArrayList<>();
         memberList.clear();
 
         Log.d("test", "start");
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("users");
-        Query userSearch = databaseReference.orderByChild("experience").endAt(5);
+        Query userSearch = databaseReference.orderByChild("experience").limitToLast(5);
         ValueEventListener searchListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -96,8 +142,8 @@ public class MainFragment extends Fragment {
                 for (int i = memberList.size() - 1; i >= 0; i--)
                     memberReverseList.add(memberList.get(i));
 
-                adapter = new BestUserAdapter(memberReverseList, getContext());
-                recyclerView.setAdapter(adapter);
+                userAdapter = new BestUserAdapter(memberReverseList, getContext());
+                bestUserList.setAdapter(userAdapter);
             }
 
             @Override
